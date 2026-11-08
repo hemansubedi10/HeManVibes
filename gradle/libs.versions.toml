@@ -11,7 +11,7 @@ ktor = "3.0.1"
 kotlinx-serialization = "1.7.3"
 kotlinx-datetime = "0.6.1"
 koin = "4.0.0"
-coil3 = "3.0.4"
+coil3 = "3.6.3"
 okio = "3.9.1"
 
 [libraries]
