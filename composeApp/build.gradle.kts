@@ -1,4 +1,5 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -9,19 +10,17 @@ plugins {
 }
 
 kotlin {
+    applyDefaultHierarchyTemplate()
+
     androidTarget {
-        compilations.all {
-            kotlinOptions {
-                jvmTarget = "21"
-            }
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_21)
         }
     }
     
     jvm("desktop") {
-        compilations.all {
-            kotlinOptions {
-                jvmTarget = "21"
-            }
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_21)
         }
     }
 
@@ -37,49 +36,34 @@ kotlin {
     }
 
     sourceSets {
-        val commonMain by getting {
-            dependencies {
-                implementation(compose.runtime)
-                implementation(compose.foundation)
-                implementation(compose.material3)
-                implementation(compose.materialIconsExtended)
-                implementation(compose.ui)
-                implementation(compose.components.resources)
-                implementation(compose.components.uiToolingPreview)
+        commonMain.dependencies {
+            implementation(compose.runtime)
+            implementation(compose.foundation)
+            implementation(compose.material3)
+            implementation(compose.materialIconsExtended)
+            implementation(compose.ui)
+            implementation(compose.components.resources)
+            implementation(compose.components.uiToolingPreview)
 
-                // Coroutines & Serialization
-                implementation(libs.kotlinx.coroutines.core)
-                implementation(libs.kotlinx.serialization.json)
-                implementation(libs.kotlinx.datetime)
-                implementation(libs.okio)
+            // Coroutines & Serialization
+            implementation(libs.kotlinx.coroutines.core)
+            implementation(libs.kotlinx.serialization.json)
+            implementation(libs.kotlinx.datetime)
+            implementation(libs.okio)
 
-                // Ktor
-                implementation(libs.ktor.client.core)
-                implementation(libs.ktor.client.content.negotiation)
-                implementation(libs.ktor.serialization.kotlinx.json)
-                implementation(libs.ktor.client.logging)
+            // Ktor
+            implementation(libs.ktor.client.core)
+            implementation(libs.ktor.client.content.negotiation)
+            implementation(libs.ktor.serialization.kotlinx.json)
+            implementation(libs.ktor.client.logging)
 
-                // Image Loading
-                implementation(libs.coil.compose)
-                implementation(libs.coil.network.ktor3)
+            // Image Loading
+            implementation(libs.coil.compose)
+            implementation(libs.coil.network.ktor3)
 
-                // Koin
-                implementation(libs.koin.core)
-                implementation(libs.koin.compose)
-            }
-        }
-
-        val androidMain by getting {
-            dependencies {
-                implementation(libs.androidx.core.ktx)
-                implementation(libs.androidx.appcompat)
-                implementation(libs.androidx.activity.compose)
-                implementation(libs.androidx.media3.exoplayer)
-                implementation(libs.androidx.media3.session)
-                implementation(libs.androidx.media3.ui)
-                implementation(libs.ktor.client.okhttp)
-                implementation(libs.koin.android)
-            }
+            // Koin
+            implementation(libs.koin.core)
+            implementation(libs.koin.compose)
         }
 
         val desktopMain by getting {
@@ -90,10 +74,19 @@ kotlin {
             }
         }
 
-        val iosMain by getting {
-            dependencies {
-                implementation(libs.ktor.client.darwin)
-            }
+        androidMain.dependencies {
+            implementation(libs.androidx.core.ktx)
+            implementation(libs.androidx.appcompat)
+            implementation(libs.androidx.activity.compose)
+            implementation(libs.androidx.media3.exoplayer)
+            implementation(libs.androidx.media3.session)
+            implementation(libs.androidx.media3.ui)
+            implementation(libs.ktor.client.okhttp)
+            implementation(libs.koin.android)
+        }
+
+        iosMain.dependencies {
+            implementation(libs.ktor.client.darwin)
         }
     }
 }

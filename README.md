@@ -25,12 +25,16 @@
 Click below to download HeMan Vibes directly for your device:
 
 <p align="center">
-  <a href="https://github.com/hemansubedi10/HeManVibes/releases/download/v1.0.0/HeManVibes-v1.0.0-android-universal.apk">
-    <img src="https://img.shields.io/badge/Download%20APK-Android%20Universal-3DDC84?style=for-the-badge&logo=android&logoColor=white" height="42" alt="Download Android APK" />
+  <a href="https://github.com/hemansubedi10/HeManVibes/releases/download/v1.0.0/HeManVibes-1.0.0-windows-setup.msi">
+    <img src="https://img.shields.io/badge/Download%20Installer-Windows%20Setup%20(MSI)-00A4EF?style=for-the-badge&logo=windows&logoColor=white" height="42" alt="Download Windows Installer" />
   </a>
   &nbsp;
-  <a href="https://github.com/hemansubedi10/HeManVibes/releases/download/v1.0.0/HeManVibes-v1.0.0-windows-x64.exe">
-    <img src="https://img.shields.io/badge/Download-Windows%20PC-00A4EF?style=for-the-badge&logo=windows&logoColor=white" height="42" alt="Download Windows" />
+  <a href="https://github.com/hemansubedi10/HeManVibes/releases/download/v1.0.0/HeManVibes-1.0.0-windows-portable.zip">
+    <img src="https://img.shields.io/badge/Download%20Portable-Windows%20(ZIP)-2B579A?style=for-the-badge&logo=windows&logoColor=white" height="42" alt="Download Windows Portable" />
+  </a>
+  &nbsp;
+  <a href="https://github.com/hemansubedi10/HeManVibes/releases/download/v1.0.0/HeManVibes-v1.0.0-android-universal.apk">
+    <img src="https://img.shields.io/badge/Download%20APK-Android%20Universal-3DDC84?style=for-the-badge&logo=android&logoColor=white" height="42" alt="Download Android APK" />
   </a>
   &nbsp;
   <a href="https://github.com/hemansubedi10/HeManVibes/releases/download/v1.0.0/HeManVibes-v1.0.0-macos-universal.dmg">
@@ -60,11 +64,31 @@ Built using **Kotlin Multiplatform (KMP)** and **Compose Multiplatform (CMP)** w
 
 | Platform | Supported Architecture | File Type | Direct Download Link |
 | :--- | :--- | :--- | :--- |
+| **🪟 Windows (Installer)** | 64-bit (x64) Windows 10/11 | `.msi` (97 MB) | [**Download Windows Setup (MSI)**](https://github.com/hemansubedi10/HeManVibes/releases/download/v1.0.0/HeManVibes-1.0.0-windows-setup.msi) |
+| **🪟 Windows (Portable)** | 64-bit (x64) No install needed | `.zip` (97 MB) | [**Download Windows Portable (ZIP)**](https://github.com/hemansubedi10/HeManVibes/releases/download/v1.0.0/HeManVibes-1.0.0-windows-portable.zip) |
+| **☕ Cross-Platform** | Any OS with Java 21+ | `.jar` | [**Download Executable JAR**](https://github.com/hemansubedi10/HeManVibes/releases/download/v1.0.0/HeManVibes-1.0.0-crossplatform.jar) |
 | **🤖 Android** | ARM64, ARMv7, x86_64 | `.apk` | [**Download APK (Direct)**](https://github.com/hemansubedi10/HeManVibes/releases/download/v1.0.0/HeManVibes-v1.0.0-android-universal.apk) |
-| **🪟 Windows** | 64-bit (x64) | `.exe` / `.msi` | [**Download Setup.exe (Direct)**](https://github.com/hemansubedi10/HeManVibes/releases/download/v1.0.0/HeManVibes-v1.0.0-windows-x64.exe) |
 | **🍎 macOS** | Apple Silicon (M1/M2/M3/M4) & Intel | `.dmg` | [**Download macOS DMG (Direct)**](https://github.com/hemansubedi10/HeManVibes/releases/download/v1.0.0/HeManVibes-v1.0.0-macos-universal.dmg) |
 | **🐧 Linux** | Ubuntu, Debian, Mint (x64) | `.deb` | [**Download Linux DEB (Direct)**](https://github.com/hemansubedi10/HeManVibes/releases/download/v1.0.0/HeManVibes-v1.0.0-linux-x64.deb) |
 | **📱 iOS** | iOS 16.0+ (iPhone & iPad) | Xcode / Sideload | [**iOS Build Instructions**](#-ios-iphone--ipad) |
+
+---
+
+## 🎯 How to Set as Default Music Player on Your Device
+
+### 🪟 On Windows:
+1. Run the [**HeManVibes Windows Setup (MSI)**](https://github.com/hemansubedi10/HeManVibes/releases/download/v1.0.0/HeManVibes-1.0.0-windows-setup.msi) to install.
+2. Open **Windows Settings** (press `Win + I`).
+3. Navigate to **Apps** → **Default apps**.
+4. In the search box, search for **HeMan Vibes** (or scroll to **Music player**).
+5. Click **Set default** (or assign `.mp3`, `.m4a`, `.wav`, `.flac`).
+6. Alternatively: Right-click any `.mp3` file on your computer → select **Open with** → **Choose another app** → choose **HeMan Vibes** → check **Always use this app**.
+
+### 🤖 On Android:
+1. When opening an audio link or music file, Android will prompt **"Open with"**.
+2. Select **HeMan Vibes** and tap **"Always"**.
+
+---
 
 ---
 
