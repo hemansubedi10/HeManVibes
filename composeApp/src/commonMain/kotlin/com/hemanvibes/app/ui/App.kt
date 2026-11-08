@@ -16,6 +16,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LibraryMusic
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -31,7 +32,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.hemanvibes.app.network.InnerTubeClient
@@ -42,15 +42,15 @@ import com.hemanvibes.app.ui.screens.HomeScreen
 import com.hemanvibes.app.ui.screens.LibraryScreen
 import com.hemanvibes.app.ui.screens.NowPlayingScreen
 import com.hemanvibes.app.ui.screens.SearchScreen
+import com.hemanvibes.app.ui.screens.SettingsScreen
 import com.hemanvibes.app.ui.theme.BgDark
 import com.hemanvibes.app.ui.theme.CardDark
 import com.hemanvibes.app.ui.theme.HeManVibesTheme
 import com.hemanvibes.app.ui.theme.NeonCyan
-import com.hemanvibes.app.ui.theme.TextPrimary
 import com.hemanvibes.app.ui.theme.TextSecondary
 
 enum class AppTab {
-    HOME, SEARCH, LIBRARY
+    HOME, SEARCH, LIBRARY, SETTINGS
 }
 
 @Composable
@@ -68,7 +68,7 @@ fun App() {
             val isDesktop = maxWidth > 768.dp
 
             if (isDesktop) {
-                // Desktop / Landscape Layout with Side Navigation Rail
+                // Desktop Layout with Navigation Rail
                 Row(modifier = Modifier.fillMaxSize()) {
                     NavigationRail(
                         containerColor = CardDark,
@@ -113,6 +113,19 @@ fun App() {
                                 unselectedTextColor = TextSecondary
                             )
                         )
+                        NavigationRailItem(
+                            selected = currentTab == AppTab.SETTINGS,
+                            onClick = { currentTab = AppTab.SETTINGS },
+                            icon = { Icon(Icons.Default.Settings, contentDescription = "Settings") },
+                            label = { Text("Settings") },
+                            colors = NavigationRailItemDefaults.colors(
+                                selectedIconColor = NeonCyan,
+                                selectedTextColor = NeonCyan,
+                                indicatorColor = CardDark,
+                                unselectedIconColor = TextSecondary,
+                                unselectedTextColor = TextSecondary
+                            )
+                        )
                     }
 
                     Column(modifier = Modifier.weight(1f).fillMaxHeight()) {
@@ -121,6 +134,7 @@ fun App() {
                                 AppTab.HOME -> HomeScreen(player, playbackState, innerTube)
                                 AppTab.SEARCH -> SearchScreen(player, playbackState, innerTube)
                                 AppTab.LIBRARY -> LibraryScreen(player, playbackState)
+                                AppTab.SETTINGS -> SettingsScreen()
                             }
                         }
 
@@ -187,6 +201,19 @@ fun App() {
                                         unselectedTextColor = TextSecondary
                                     )
                                 )
+                                NavigationBarItem(
+                                    selected = currentTab == AppTab.SETTINGS,
+                                    onClick = { currentTab = AppTab.SETTINGS },
+                                    icon = { Icon(Icons.Default.Settings, contentDescription = "Settings") },
+                                    label = { Text("Settings") },
+                                    colors = NavigationBarItemDefaults.colors(
+                                        selectedIconColor = NeonCyan,
+                                        selectedTextColor = NeonCyan,
+                                        indicatorColor = CardDark,
+                                        unselectedIconColor = TextSecondary,
+                                        unselectedTextColor = TextSecondary
+                                    )
+                                )
                             }
                         }
                     }
@@ -196,6 +223,7 @@ fun App() {
                             AppTab.HOME -> HomeScreen(player, playbackState, innerTube)
                             AppTab.SEARCH -> SearchScreen(player, playbackState, innerTube)
                             AppTab.LIBRARY -> LibraryScreen(player, playbackState)
+                            AppTab.SETTINGS -> SettingsScreen()
                         }
                     }
                 }

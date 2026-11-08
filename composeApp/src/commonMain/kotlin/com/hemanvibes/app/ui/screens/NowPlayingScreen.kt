@@ -1,6 +1,8 @@
 package com.hemanvibes.app.ui.screens
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -14,34 +16,38 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Bedtime
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Lyrics
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.QueueMusic
 import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material.icons.filled.Shuffle
 import androidx.compose.material.icons.filled.SkipNext
 import androidx.compose.material.icons.filled.SkipPrevious
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Slider
-import androidx.compose.material3.SliderDefaults
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -59,15 +65,16 @@ import com.hemanvibes.app.model.PlaybackState
 import com.hemanvibes.app.model.PlaybackStatus
 import com.hemanvibes.app.network.LyricsClient
 import com.hemanvibes.app.player.AudioPlayer
-import com.hemanvibes.app.ui.theme.BgDark
+import com.hemanvibes.app.ui.components.MeshBackdrop
+import com.hemanvibes.app.ui.components.SongRow
+import com.hemanvibes.app.ui.components.WavySeekBar
 import com.hemanvibes.app.ui.theme.CardDark
 import com.hemanvibes.app.ui.theme.NeonCyan
 import com.hemanvibes.app.ui.theme.NeonPink
-import com.hemanvibes.app.ui.theme.NeonViolet
 import com.hemanvibes.app.ui.theme.TextPrimary
 import com.hemanvibes.app.ui.theme.TextSecondary
-import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NowPlayingScreen(
     state: PlaybackState,
@@ -77,16 +84,18 @@ fun NowPlayingScreen(
 ) {
     val song = state.currentSong ?: return
     var showLyrics by remember { mutableStateOf(false) }
+    var showQueue by remember { mutableStateOf(false) }
+    var showSleepTimer by remember { mutableStateOf(false) }
+    var activeTimerMinutes by remember { mutableStateOf<Int?>(null) }
     var lyrics by remember { mutableStateOf<Lyrics?>(null) }
     var isLiked by remember { mutableStateOf(false) }
     val listState = rememberLazyListState()
-    val scope = rememberCoroutineScope()
 
     LaunchedEffect(song.id) {
         lyrics = lyricsClient.getLyrics(song.title, song.artist)
     }
 
-    // Auto-scroll lyrics to current line
+    // Auto-scroll synced karaoke lyrics
     val currentLineIndex = lyrics?.syncedLyrics?.indexOfLast { it.timestampMs <= state.currentPositionMs } ?: -1
     LaunchedEffect(currentLineIndex) {
         if (showLyrics && currentLineIndex >= 0) {
@@ -94,23 +103,21 @@ fun NowPlayingScreen(
         }
     }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(
-                Brush.verticalGradient(
-                    listOf(NeonViolet.copy(alpha = 0.35f), BgDark, BgDark)
-                )
-            )
-            .padding(horizontal = 24.dp)
-    ) {
+    val isPlaying = state.status == PlaybackStatus.PLAYING
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        // Fluid Ambient Mesh Backdrop (Apple Music / SimpMusic style)
+        MeshBackdrop(isPlaying = isPlaying)
+
         Column(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Spacer(modifier = Modifier.height(20.dp))
 
-            // Top Bar
+            // Top Header Bar
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -126,26 +133,35 @@ fun NowPlayingScreen(
                 }
 
                 Text(
-                    text = "HEMAN VIBES PLAYER",
+                    text = if (showLyrics) "KARAOKE LYRICS" else "HEMAN VIBES EXPRESSIVE",
                     style = MaterialTheme.typography.labelSmall.copy(
-                        fontWeight = FontWeight.Bold,
+                        fontWeight = FontWeight.Black,
                         letterSpacing = 2.sp
                     ),
                     color = NeonCyan
                 )
 
-                IconButton(onClick = { showLyrics = !showLyrics }) {
-                    Icon(
-                        Icons.Default.Lyrics,
-                        contentDescription = "Lyrics",
-                        tint = if (showLyrics) NeonCyan else TextSecondary
-                    )
+                Row {
+                    IconButton(onClick = { showSleepTimer = true }) {
+                        Icon(
+                            Icons.Default.Bedtime,
+                            contentDescription = "Sleep Timer",
+                            tint = if (activeTimerMinutes != null) NeonCyan else TextSecondary
+                        )
+                    }
+                    IconButton(onClick = { showLyrics = !showLyrics }) {
+                        Icon(
+                            Icons.Default.Lyrics,
+                            contentDescription = "Lyrics",
+                            tint = if (showLyrics) NeonPink else TextSecondary
+                        )
+                    }
                 }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(18.dp))
 
-            // Main Visual: Artwork OR Synced Lyrics
+            // Center Display: Artwork OR Synced Lyrics
             Box(
                 modifier = Modifier
                     .weight(1f)
@@ -156,7 +172,7 @@ fun NowPlayingScreen(
                     LazyColumn(
                         state = listState,
                         modifier = Modifier.fillMaxSize(),
-                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(20.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         itemsIndexed(lyrics!!.syncedLyrics) { idx, line ->
@@ -164,14 +180,14 @@ fun NowPlayingScreen(
                             Text(
                                 text = line.text,
                                 style = if (isCurrent) {
-                                    MaterialTheme.typography.titleLarge.copy(
+                                    MaterialTheme.typography.headlineSmall.copy(
                                         fontWeight = FontWeight.Black,
                                         brush = Brush.horizontalGradient(listOf(NeonCyan, NeonPink))
                                     )
                                 } else {
-                                    MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Medium)
+                                    MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Medium)
                                 },
-                                color = if (isCurrent) TextPrimary else TextSecondary.copy(alpha = 0.5f),
+                                color = if (isCurrent) TextPrimary else TextSecondary.copy(alpha = 0.45f),
                                 textAlign = TextAlign.Center,
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -181,12 +197,12 @@ fun NowPlayingScreen(
                         }
                     }
                 } else {
-                    // Artwork with Neon Border
+                    // Expressive Squircle Vinyl Artwork
                     Box(
                         modifier = Modifier
                             .fillMaxWidth(0.85f)
                             .aspectRatio(1f)
-                            .clip(RoundedCornerShape(24.dp))
+                            .clip(RoundedCornerShape(32.dp))
                             .background(CardDark),
                         contentAlignment = Alignment.Center
                     ) {
@@ -208,9 +224,9 @@ fun NowPlayingScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
-            // Song Info & Favorite
+            // Track Info & Favorite Heart
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -219,14 +235,14 @@ fun NowPlayingScreen(
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = song.title,
-                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Black),
                         color = TextPrimary,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
                     Text(
-                        text = song.artist,
-                        style = MaterialTheme.typography.bodyLarge,
+                        text = "${song.artist} • ${song.album ?: "Single"}",
+                        style = MaterialTheme.typography.bodyMedium,
                         color = TextSecondary,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
@@ -243,44 +259,37 @@ fun NowPlayingScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(14.dp))
 
-            // Seek Bar
-            Column(modifier = Modifier.fillMaxWidth()) {
-                Slider(
-                    value = state.progress,
-                    onValueChange = { targetProgress ->
-                        val targetMs = (targetProgress * state.durationMs).toLong()
-                        player.seekTo(targetMs)
-                    },
-                    colors = SliderDefaults.colors(
-                        thumbColor = NeonCyan,
-                        activeTrackColor = NeonCyan,
-                        inactiveTrackColor = Color.White.copy(alpha = 0.15f)
-                    ),
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(
-                        text = formatMs(state.currentPositionMs),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = TextSecondary
-                    )
-                    Text(
-                        text = formatMs(state.durationMs),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = TextSecondary
-                    )
+            // Animated Material 3 Expressive Wavy Seek Bar!
+            WavySeekBar(
+                progress = state.progress,
+                isPlaying = isPlaying,
+                onSeek = { targetProgress ->
+                    val targetMs = (targetProgress * state.durationMs).toLong()
+                    player.seekTo(targetMs)
                 }
+            )
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = formatMs(state.currentPositionMs),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = TextSecondary
+                )
+                Text(
+                    text = formatMs(state.durationMs),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = TextSecondary
+                )
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(18.dp))
 
-            // Playback Controls Row
+            // Transport Control Buttons
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -295,28 +304,28 @@ fun NowPlayingScreen(
                         Icons.Default.SkipPrevious,
                         contentDescription = "Previous",
                         tint = TextPrimary,
-                        modifier = Modifier.size(36.dp)
+                        modifier = Modifier.size(38.dp)
                     )
                 }
 
-                // Big Glowing Play / Pause Button
+                // Glowing Neon Play/Pause Pulsar
                 Box(
                     modifier = Modifier
-                        .size(68.dp)
+                        .size(72.dp)
                         .clip(CircleShape)
                         .background(
                             Brush.linearGradient(listOf(NeonCyan, NeonPink))
                         )
                         .clickable {
-                            if (state.status == PlaybackStatus.PLAYING) player.pause() else player.resume()
+                            if (isPlaying) player.pause() else player.resume()
                         },
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                        imageVector = if (state.status == PlaybackStatus.PLAYING) Icons.Default.Pause else Icons.Default.PlayArrow,
+                        imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
                         contentDescription = "Play/Pause",
                         tint = Color.Black,
-                        modifier = Modifier.size(36.dp)
+                        modifier = Modifier.size(40.dp)
                     )
                 }
 
@@ -325,16 +334,118 @@ fun NowPlayingScreen(
                         Icons.Default.SkipNext,
                         contentDescription = "Next",
                         tint = TextPrimary,
-                        modifier = Modifier.size(36.dp)
+                        modifier = Modifier.size(38.dp)
                     )
                 }
 
-                IconButton(onClick = { /* Repeat */ }) {
-                    Icon(Icons.Default.Repeat, contentDescription = "Repeat", tint = TextSecondary)
+                IconButton(onClick = { showQueue = true }) {
+                    Icon(
+                        Icons.Default.QueueMusic,
+                        contentDescription = "Up Next Queue",
+                        tint = TextSecondary,
+                        modifier = Modifier.size(28.dp)
+                    )
                 }
             }
 
             Spacer(modifier = Modifier.height(36.dp))
+        }
+
+        // Up Next Queue Sheet
+        if (showQueue) {
+            ModalBottomSheet(
+                onDismissRequest = { showQueue = false },
+                sheetState = rememberModalBottomSheetState(),
+                containerColor = CardDark
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp, vertical = 12.dp)
+                ) {
+                    Text(
+                        text = "Up Next Queue (${state.queue.size} songs)",
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                        color = TextPrimary
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    LazyColumn(modifier = Modifier.fillMaxWidth().height(360.dp)) {
+                        itemsIndexed(state.queue) { idx, qSong ->
+                            SongRow(
+                                song = qSong,
+                                isPlaying = state.queueIndex == idx,
+                                onClick = {
+                                    player.setQueue(state.queue, idx)
+                                    showQueue = false
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
+        // Sleep Timer Sheet
+        if (showSleepTimer) {
+            ModalBottomSheet(
+                onDismissRequest = { showSleepTimer = false },
+                sheetState = rememberModalBottomSheetState(),
+                containerColor = CardDark
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 24.dp, vertical = 16.dp)
+                ) {
+                    Text(
+                        text = "Sleep Timer",
+                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                        color = TextPrimary
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    listOf(15, 30, 45, 60).forEach { mins ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(12.dp))
+                                .clickable {
+                                    activeTimerMinutes = mins
+                                    showSleepTimer = false
+                                }
+                                .padding(vertical = 14.dp, horizontal = 12.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "$mins minutes",
+                                color = if (activeTimerMinutes == mins) NeonCyan else TextPrimary,
+                                style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Medium)
+                            )
+                            if (activeTimerMinutes == mins) {
+                                Text("Active", color = NeonCyan, style = MaterialTheme.typography.bodySmall)
+                            }
+                        }
+                    }
+
+                    if (activeTimerMinutes != null) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "Turn off timer",
+                            color = NeonPink,
+                            modifier = Modifier
+                                .clickable {
+                                    activeTimerMinutes = null
+                                    showSleepTimer = false
+                                }
+                                .padding(12.dp),
+                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold)
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(24.dp))
+                }
+            }
         }
     }
 }

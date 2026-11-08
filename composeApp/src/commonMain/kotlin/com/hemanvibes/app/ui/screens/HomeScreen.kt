@@ -20,6 +20,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Whatshot
 import androidx.compose.material3.CircularProgressIndicator
@@ -31,6 +32,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -53,6 +55,7 @@ import com.hemanvibes.app.ui.theme.NeonPink
 import com.hemanvibes.app.ui.theme.NeonViolet
 import com.hemanvibes.app.ui.theme.TextPrimary
 import com.hemanvibes.app.ui.theme.TextSecondary
+import kotlinx.coroutines.launch
 
 @Composable
 fun HomeScreen(
@@ -61,16 +64,27 @@ fun HomeScreen(
     innerTube: InnerTubeClient,
     modifier: Modifier = Modifier
 ) {
+    val moods = listOf("Chill Vibe", "Workout", "Focus & Study", "Phonk", "Synthwave", "Party & EDM", "Lofi Beats")
+    var selectedMood by remember { mutableStateOf(moods[0]) }
+
     var trendingSongs by remember { mutableStateOf<List<Song>>(emptyList()) }
     var quickPicks by remember { mutableStateOf<List<Song>>(emptyList()) }
+    var moodSongs by remember { mutableStateOf<List<Song>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
+    val scope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
-        val trending = innerTube.searchSongs("Top Global Hits 2026")
-        val picks = innerTube.searchSongs("Synthwave Lofi Chill Vibes")
-        trendingSongs = trending
-        quickPicks = picks
+        trendingSongs = innerTube.searchSongs("Top Global Hits 2026")
+        quickPicks = innerTube.searchSongs("The Weeknd Daft Punk Dua Lipa")
+        moodSongs = innerTube.searchSongs(selectedMood)
         isLoading = false
+    }
+
+    fun onMoodSelected(mood: String) {
+        selectedMood = mood
+        scope.launch {
+            moodSongs = innerTube.searchSongs(mood)
+        }
     }
 
     LazyColumn(
@@ -79,7 +93,7 @@ fun HomeScreen(
             .padding(horizontal = 16.dp),
         contentPadding = PaddingValues(bottom = 120.dp)
     ) {
-        // Hero Header
+        // App Header
         item {
             Spacer(modifier = Modifier.height(16.dp))
             Row(
@@ -96,16 +110,16 @@ fun HomeScreen(
                         )
                     )
                     Text(
-                        text = "Stream Unlimited • Your Music, Everywhere",
+                        text = "Hi HeMan • Stream Unlimited Ad-Free",
                         color = TextSecondary,
                         style = MaterialTheme.typography.bodySmall
                     )
                 }
 
-                // Avatar / Profile badge
+                // Profile Avatar Badge
                 Box(
                     modifier = Modifier
-                        .size(40.dp)
+                        .size(42.dp)
                         .clip(CircleShape)
                         .background(
                             Brush.linearGradient(listOf(NeonCyan, NeonViolet))
@@ -114,9 +128,38 @@ fun HomeScreen(
                 ) {
                     Text(
                         text = "HV",
-                        fontWeight = FontWeight.Bold,
+                        fontWeight = FontWeight.Black,
                         color = Color.Black
                     )
+                }
+            }
+            Spacer(modifier = Modifier.height(20.dp))
+        }
+
+        // Mood & Activity Chips Bar
+        item {
+            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                items(moods) { mood ->
+                    val isSelected = mood == selectedMood
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(20.dp))
+                            .background(
+                                if (isSelected) {
+                                    Brush.horizontalGradient(listOf(NeonCyan, NeonViolet))
+                                } else {
+                                    Brush.linearGradient(listOf(CardDark, CardDark))
+                                }
+                            )
+                            .clickable { onMoodSelected(mood) }
+                            .padding(horizontal = 16.dp, vertical = 8.dp)
+                    ) {
+                        Text(
+                            text = mood,
+                            color = if (isSelected) Color.Black else TextPrimary,
+                            style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold)
+                        )
+                    }
                 }
             }
             Spacer(modifier = Modifier.height(24.dp))
@@ -124,26 +167,23 @@ fun HomeScreen(
 
         // Quick Picks Carousel
         item {
-            Text(
-                text = "Vibe Picks For You",
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                color = TextPrimary
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = NeonCyan)
+                Spacer(modifier = Modifier.width(6.dp))
+                Text(
+                    text = "Speed Dial Picks",
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                    color = TextPrimary
+                )
+            }
             Spacer(modifier = Modifier.height(12.dp))
 
             if (isLoading) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(150.dp),
-                    contentAlignment = Alignment.Center
-                ) {
+                Box(modifier = Modifier.fillMaxWidth().height(150.dp), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator(color = NeonCyan)
                 }
             } else {
-                LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(14.dp)
-                ) {
+                LazyRow(horizontalArrangement = Arrangement.spacedBy(14.dp)) {
                     items(quickPicks.take(6)) { song ->
                         QuickPickCard(song = song) {
                             player.setQueue(quickPicks, quickPicks.indexOf(song))
@@ -154,13 +194,32 @@ fun HomeScreen(
             Spacer(modifier = Modifier.height(28.dp))
         }
 
-        // Trending Section Header
+        // Selected Mood Song Collection
         item {
+            Text(
+                text = "Vibes For: $selectedMood",
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                color = TextPrimary
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+        }
+
+        items(moodSongs.take(5)) { song ->
+            SongRow(
+                song = song,
+                isPlaying = playbackState.currentSong?.id == song.id,
+                onClick = { player.setQueue(moodSongs, moodSongs.indexOf(song)) }
+            )
+        }
+
+        // Trending Header
+        item {
+            Spacer(modifier = Modifier.height(24.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(Icons.Default.Whatshot, contentDescription = null, tint = NeonPink)
                 Spacer(modifier = Modifier.width(6.dp))
                 Text(
-                    text = "Trending Now",
+                    text = "Global Trending Charts",
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                     color = TextPrimary
                 )
@@ -168,17 +227,12 @@ fun HomeScreen(
             Spacer(modifier = Modifier.height(12.dp))
         }
 
-        // Trending Songs List
-        if (!isLoading) {
-            items(trendingSongs) { song ->
-                SongRow(
-                    song = song,
-                    isPlaying = playbackState.currentSong?.id == song.id,
-                    onClick = {
-                        player.setQueue(trendingSongs, trendingSongs.indexOf(song))
-                    }
-                )
-            }
+        items(trendingSongs) { song ->
+            SongRow(
+                song = song,
+                isPlaying = playbackState.currentSong?.id == song.id,
+                onClick = { player.setQueue(trendingSongs, trendingSongs.indexOf(song)) }
+            )
         }
     }
 }
@@ -188,7 +242,7 @@ fun QuickPickCard(song: Song, onClick: () -> Unit) {
     Column(
         modifier = Modifier
             .width(135.dp)
-            .clip(RoundedCornerShape(12.dp))
+            .clip(RoundedCornerShape(14.dp))
             .background(CardDark)
             .clickable { onClick() }
             .padding(10.dp)
@@ -196,7 +250,7 @@ fun QuickPickCard(song: Song, onClick: () -> Unit) {
         Box(
             modifier = Modifier
                 .size(115.dp)
-                .clip(RoundedCornerShape(8.dp))
+                .clip(RoundedCornerShape(10.dp))
                 .background(CardHighlight),
             contentAlignment = Alignment.Center
         ) {

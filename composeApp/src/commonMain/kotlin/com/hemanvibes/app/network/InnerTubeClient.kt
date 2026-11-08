@@ -3,7 +3,9 @@ package com.hemanvibes.app.network
 import com.hemanvibes.app.model.Song
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.request.get
 import io.ktor.client.request.header
+import io.ktor.client.request.parameter
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText
@@ -11,10 +13,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonArray
-import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
-import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
@@ -33,7 +32,7 @@ class InnerTubeClient(
 ) {
     companion object {
         private const val SEARCH_URL = "https://music.youtube.com/youtubei/v1/search?prettyPrint=false"
-        private const val PLAYER_URL = "https://www.youtube.com/youtubei/v1/player?prettyPrint=false"
+        private const val SUGGESTIONS_URL = "https://suggestqueries-clients6.youtube.com/complete/search"
         private const val USER_AGENT_WEB = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
     }
 
@@ -62,6 +61,37 @@ class InnerTubeClient(
             parseSearchResponse(responseText)
         } catch (e: Exception) {
             e.printStackTrace()
+            emptyList()
+        }
+    }
+
+    /**
+     * Real-time search suggestions as the user types
+     */
+    suspend fun getSearchSuggestions(query: String): List<String> {
+        if (query.isBlank()) return emptyList()
+        return try {
+            val text = client.get(SUGGESTIONS_URL) {
+                parameter("client", "youtube")
+                parameter("ds", "yt")
+                parameter("q", query)
+            }.bodyAsText()
+
+            val startIdx = text.indexOf('[')
+            val endIdx = text.lastIndexOf(']')
+            if (startIdx != -1 && endIdx != -1 && endIdx > startIdx) {
+                val jsonStr = text.substring(startIdx, endIdx + 1)
+                val json = Json { ignoreUnknownKeys = true }
+                val rootArray = json.parseToJsonElement(jsonStr).jsonArray
+                if (rootArray.size > 1) {
+                    val suggestionsArray = rootArray[1].jsonArray
+                    return suggestionsArray.mapNotNull {
+                        it.jsonArray.getOrNull(0)?.jsonPrimitive?.content
+                    }
+                }
+            }
+            emptyList()
+        } catch (e: Exception) {
             emptyList()
         }
     }
@@ -137,10 +167,5 @@ class InnerTubeClient(
             }
         }
         return songs
-    }
-
-    suspend fun resolveStreamUrl(videoId: String): String? {
-        // Primary fallback stream resolver using embed endpoints
-        return "https://www.youtube.com/watch?v=$videoId"
     }
 }
