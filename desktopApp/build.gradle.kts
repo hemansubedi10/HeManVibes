@@ -37,6 +37,18 @@ compose.desktop {
             copyright = "© 2026 Heman Subedi. All rights reserved."
             vendor = "HeMan Vibes"
 
+            modules(
+                "java.base",
+                "java.desktop",
+                "java.net.http",
+                "java.naming",
+                "java.management",
+                "java.security.jgss",
+                "java.instrument",
+                "java.sql",
+                "jdk.unsupported"
+            )
+
             windows {
                 menuGroup = "HeMan Vibes"
                 upgradeUuid = "68c227bf-463e-4b68-b34e-09f482d8d80c"
