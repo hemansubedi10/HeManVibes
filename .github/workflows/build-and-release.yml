@@ -33,7 +33,7 @@ jobs:
         run: ./gradlew :androidApp:assembleDebug --stacktrace
 
       - name: Upload Android APK
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: HeManVibes-Android-APK
           path: androidApp/build/outputs/apk/debug/*.apk
@@ -58,7 +58,7 @@ jobs:
         run: .\gradlew.bat :desktopApp:packageMsi --stacktrace
 
       - name: Upload Windows MSI
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: HeManVibes-Windows-MSI
           path: desktopApp/build/compose/binaries/main/msi/*.msi
@@ -86,7 +86,7 @@ jobs:
         run: ./gradlew :desktopApp:packageDmg --stacktrace
 
       - name: Upload macOS DMG
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: HeManVibes-macOS-DMG
           path: desktopApp/build/compose/binaries/main/dmg/*.dmg
