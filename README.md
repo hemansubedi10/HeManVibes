@@ -9,10 +9,13 @@
 *Crafted with ❤️ by [Heman Subedi](https://github.com/hemansubedi10)*
 
 [![Release](https://img.shields.io/github/v/release/hemansubedi10/HeManVibes?color=00F5FF&logo=github)](https://github.com/hemansubedi10/HeManVibes/releases/latest)
-[![Build & Release](https://img.shields.io/github/actions/workflow/status/hemansubedi10/HeManVibes/build-and-release.yml?logo=githubactions&logoColor=white)](https://github.com/hemansubedi10/HeManVibes/actions)
+[![CI/CD](https://img.shields.io/github/actions/workflow/status/hemansubedi10/HeManVibes/ci.yml?branch=main&label=CI&logo=githubactions&logoColor=white)](https://github.com/hemansubedi10/HeManVibes/actions)
+[![CodeQL Security](https://img.shields.io/github/actions/workflow/status/hemansubedi10/HeManVibes/codeql-analysis.yml?branch=main&label=CodeQL&logo=github&logoColor=white)](https://github.com/hemansubedi10/HeManVibes/security/code-scanning)
+[![Dependabot](https://img.shields.io/badge/Dependabot-Active-02569B.svg?logo=dependabot&logoColor=white)](https://github.com/hemansubedi10/HeManVibes/network/updates)
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.1.0-7F52FF.svg?logo=kotlin&logoColor=white)](https://kotlinlang.org/)
 [![Compose Multiplatform](https://img.shields.io/badge/Compose%20Multiplatform-1.7.1-4285F4.svg?logo=jetpackcompose&logoColor=white)](https://www.jetbrains.com/lp/compose-multiplatform/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-FF007F.svg)](./LICENSE)
+[![Website](https://img.shields.io/badge/Web%20Showcase-Live-00F5FF.svg?logo=googlechrome&logoColor=black)](https://hemansubedi10.github.io/HeManVibes/)
 
 <br/>
 
