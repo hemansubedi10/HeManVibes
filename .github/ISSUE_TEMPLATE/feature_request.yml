@@ -1,0 +1,34 @@
+name: 💡 Feature Request
+description: Suggest an enhancement or new idea for HeMan Vibes
+title: "[FEATURE]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Have an idea to make HeMan Vibes even better? We'd love to hear it!
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Feature Scope
+      options:
+        - Audio Engine & Playback
+        - User Interface & Themes
+        - YouTube Music & Scraping
+        - Lyrics & Karaoke
+        - Playlist & Local Library
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Is your feature request related to a problem?
+      description: Describe the problem or limitation you're encountering.
+  - type: textarea
+    id: solution
+    attributes:
+      label: Describe the Solution You'd Like
+      description: A clear explanation of what you want to happen.
+    validations:
+      required: true
