@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 420" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#080612" />
+      <stop offset="50%" stop-color="#0C0A1B" />
+      <stop offset="100%" stop-color="#05040A" />
+    </linearGradient>
+
+    <linearGradient id="titleGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#00F5FF" />
+      <stop offset="40%" stop-color="#A259FF" />
+      <stop offset="100%" stop-color="#FF007F" />
+    </linearGradient>
+
+    <linearGradient id="neonVibe" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00F5FF" />
+      <stop offset="50%" stop-color="#7B2CBF" />
+      <stop offset="100%" stop-color="#FF007F" />
+    </linearGradient>
+
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="10" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="420" fill="url(#bg)" rx="24" />
+  <rect width="1196" height="416" x="2" y="2" fill="none" stroke="url(#titleGrad)" stroke-width="1.5" stroke-opacity="0.3" rx="22" />
+
+  <!-- Background decorative glows -->
+  <circle cx="200" cy="210" r="180" fill="#7B2CBF" opacity="0.12" filter="url(#glow)" />
+  <circle cx="950" cy="180" r="160" fill="#00F5FF" opacity="0.08" filter="url(#glow)" />
+
+  <!-- Logo on the Left -->
+  <g transform="translate(110, 100) scale(0.42)">
+    <circle cx="256" cy="256" r="140" fill="#7B2CBF" opacity="0.25" filter="url(#glow)" />
+    <!-- Headphone Arc -->
+    <path d="M 120 250 A 136 136 0 0 1 392 250" fill="none" stroke="url(#titleGrad)" stroke-width="26" stroke-linecap="round" filter="url(#glow)" />
+    <!-- Ear Cups -->
+    <rect x="92" y="230" width="38" height="92" rx="19" fill="url(#neonVibe)" />
+    <rect x="382" y="230" width="38" height="92" rx="19" fill="url(#neonVibe)" />
+    <!-- HV Equalizer Waves -->
+    <rect x="186" y="190" width="18" height="145" rx="9" fill="#00F5FF" filter="url(#glow)" />
+    <rect x="308" y="190" width="18" height="145" rx="9" fill="#FF007F" filter="url(#glow)" />
+    <rect x="216" y="225" width="16" height="80" rx="8" fill="url(#neonVibe)" />
+    <rect x="247" y="255" width="18" height="110" rx="9" fill="url(#neonVibe)" filter="url(#glow)" />
+    <rect x="278" y="225" width="16" height="80" rx="8" fill="url(#neonVibe)" />
+  </g>
+
+  <!-- Typography on the Right -->
+  <g transform="translate(370, 160)">
+    <!-- App Name -->
+    <text x="0" y="30" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-weight="900" font-size="62" letter-spacing="4" fill="url(#titleGrad)">HEMAN VIBES</text>
+    
+    <!-- Tagline -->
+    <text x="5" y="85" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-weight="400" font-size="22" letter-spacing="1.5" fill="#E2E8F0">Next-Gen Cross-Platform Music Player</text>
+    
+    <!-- Subtitle / Highlights -->
+    <text x="5" y="125" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-weight="500" font-size="15" letter-spacing="2" fill="#94A3B8">YOUTUBE MUSIC BACKEND • SYNCED LYRICS • AD-FREE • 100% OPEN SOURCE</text>
+
+    <!-- Platform Badges -->
+    <g transform="translate(5, 155)">
+      <!-- Android -->
+      <rect x="0" y="0" width="110" height="34" rx="8" fill="#1E1B38" stroke="#3D3768" stroke-width="1" />
+      <text x="22" y="22" font-family="sans-serif" font-size="13" font-weight="600" fill="#3DDC84">Android</text>
+
+      <!-- Windows -->
+      <rect x="122" y="0" width="118" height="34" rx="8" fill="#1E1B38" stroke="#3D3768" stroke-width="1" />
+      <text x="144" y="22" font-family="sans-serif" font-size="13" font-weight="600" fill="#00A4EF">Windows</text>
+
+      <!-- macOS -->
+      <rect x="252" y="0" width="110" height="34" rx="8" fill="#1E1B38" stroke="#3D3768" stroke-width="1" />
+      <text x="278" y="22" font-family="sans-serif" font-size="13" font-weight="600" fill="#F5F5F7">macOS</text>
+
+      <!-- iOS -->
+      <rect x="374" y="0" width="95" height="34" rx="8" fill="#1E1B38" stroke="#3D3768" stroke-width="1" />
+      <text x="408" y="22" font-family="sans-serif" font-size="13" font-weight="600" fill="#FA2D48">iOS</text>
+
+      <!-- Linux -->
+      <rect x="481" y="0" width="100" height="34" rx="8" fill="#1E1B38" stroke="#3D3768" stroke-width="1" />
+      <text x="508" y="22" font-family="sans-serif" font-size="13" font-weight="600" fill="#FCC624">Linux</text>
+    </g>
+  </g>
+</svg>

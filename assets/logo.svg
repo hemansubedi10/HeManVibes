@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0F0C20" />
+      <stop offset="50%" stop-color="#080710" />
+      <stop offset="100%" stop-color="#030206" />
+    </linearGradient>
+
+    <!-- Accent Gradient Cyan-Violet -->
+    <linearGradient id="neonVibe" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00F5FF" />
+      <stop offset="50%" stop-color="#7B2CBF" />
+      <stop offset="100%" stop-color="#FF007F" />
+    </linearGradient>
+
+    <!-- Headphone Arc Gradient -->
+    <linearGradient id="headbandGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#00F5FF" />
+      <stop offset="50%" stop-color="#9D4EDD" />
+      <stop offset="100%" stop-color="#FF007F" />
+    </linearGradient>
+
+    <!-- Soft Glow Filter -->
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="12" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+
+    <filter id="slightGlow" x="-10%" y="-10%" width="120%" height="120%">
+      <feGaussianBlur stdDeviation="4" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Squircle Base Canvas -->
+  <rect width="512" height="512" rx="112" fill="url(#bgGrad)" />
+  <rect width="504" height="504" x="4" y="4" rx="108" fill="none" stroke="url(#headbandGrad)" stroke-width="2" stroke-opacity="0.35" />
+
+  <!-- Background Ambient Glow Sphere -->
+  <circle cx="256" cy="256" r="140" fill="#7B2CBF" opacity="0.18" filter="url(#glow)" />
+
+  <!-- Headphone Arc -->
+  <path d="M 120 250 A 136 136 0 0 1 392 250" fill="none" stroke="url(#headbandGrad)" stroke-width="22" stroke-linecap="round" filter="url(#glow)" />
+
+  <!-- Left Ear Cup -->
+  <rect x="96" y="230" width="34" height="88" rx="17" fill="url(#neonVibe)" filter="url(#slightGlow)" />
+  <rect x="102" y="240" width="10" height="68" rx="5" fill="#FFFFFF" opacity="0.6" />
+
+  <!-- Right Ear Cup -->
+  <rect x="382" y="230" width="34" height="88" rx="17" fill="url(#neonVibe)" filter="url(#slightGlow)" />
+  <rect x="400" y="240" width="10" height="68" rx="5" fill="#FFFFFF" opacity="0.6" />
+
+  <!-- Central Dynamic Sound Waves forming Monogram 'H' & 'V' -->
+  <!-- Left Column of 'H' -->
+  <rect x="190" y="195" width="16" height="135" rx="8" fill="#00F5FF" filter="url(#slightGlow)" />
+  
+  <!-- Right Column of 'H' -->
+  <rect x="306" y="195" width="16" height="135" rx="8" fill="#FF007F" filter="url(#slightGlow)" />
+
+  <!-- Middle V-Wave bridge connecting them -->
+  <!-- Wave Bars forming the 'V' dip and audio equalizer -->
+  <rect x="218" y="225" width="14" height="75" rx="7" fill="url(#neonVibe)" />
+  <rect x="248" y="250" width="16" height="105" rx="8" fill="url(#neonVibe)" filter="url(#glow)" />
+  <rect x="280" y="225" width="14" height="75" rx="7" fill="url(#neonVibe)" />
+
+  <!-- Equalizer Pulse Dots -->
+  <circle cx="256" cy="180" r="7" fill="#00F5FF" filter="url(#slightGlow)" />
+  <circle cx="225" cy="195" r="5" fill="#7B2CBF" />
+  <circle cx="287" cy="195" r="5" fill="#FF007F" />
+</svg>
