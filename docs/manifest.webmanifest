@@ -1,0 +1,37 @@
+{
+  "name": "HeMan Vibes",
+  "short_name": "HeMan Vibes",
+  "description": "Next-Gen Cross-Platform Music Player powered by YouTube Music and Synced Lyrics",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#090714",
+  "theme_color": "#090714",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "./icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["music", "entertainment", "audio"],
+  "shortcuts": [
+    {
+      "name": "Search Music",
+      "url": "./index.html#search",
+      "icons": [{ "src": "./icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Your Library",
+      "url": "./index.html#library",
+      "icons": [{ "src": "./icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}

@@ -2,26 +2,39 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>HeMan Vibes — Next-Gen Cross-Platform Music Player</title>
-  <meta name="description" content="Next-Gen Cross-Platform Music Player powered by Compose Multiplatform & YouTube Music. Free, open source, ad-free streaming with synced lyrics for Android, Windows, macOS, iOS, and Linux.">
-  <link rel="icon" type="image/png" href="../assets/icon.png">
+  <meta name="description" content="Next-Gen Cross-Platform Music Player powered by Compose Multiplatform & YouTube Music. Free, open-source, ad-free streaming with synced lyrics for Android, Windows, macOS, iOS, and Linux.">
+  <meta name="theme-color" content="#090714">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="HeMan Vibes">
+  
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" type="image/png" href="./icon-192.png">
+  <link rel="apple-touch-icon" href="./icon-192.png">
+  
   <style>
     :root {
       --bg: #090714;
-      --card: #131024;
-      --card-border: #262144;
+      --bg-surface: #120e24;
+      --card: #181432;
+      --card-border: #28224d;
+      --card-hover: #211c42;
       --neon-cyan: #00F5FF;
       --neon-pink: #FF007F;
       --neon-purple: #9D4EDD;
+      --neon-violet: #7B2CBF;
       --text: #F8FAFC;
       --text-muted: #94A3B8;
+      --text-sub: #64748B;
     }
 
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
+      -webkit-tap-highlight-color: transparent;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     }
 
@@ -29,413 +42,1662 @@
       background: var(--bg);
       color: var(--text);
       overflow-x: hidden;
-      line-height: 1.6;
+      min-height: 100vh;
+      user-select: none;
     }
 
-    /* Ambient Glow Background */
-    .glow-orb-1 {
+    /* Ambient Mesh Backdrop */
+    #mesh-canvas {
       position: fixed;
-      top: -100px;
-      left: 10%;
-      width: 500px;
-      height: 500px;
-      background: radial-gradient(circle, rgba(157, 78, 221, 0.22) 0%, transparent 70%);
-      filter: blur(80px);
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: -2;
+      pointer-events: none;
+      opacity: 0.85;
+    }
+
+    .vignette-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: radial-gradient(circle at center, transparent 30%, rgba(9, 7, 20, 0.75) 85%);
       z-index: -1;
       pointer-events: none;
     }
 
-    .glow-orb-2 {
-      position: fixed;
-      top: 30%;
-      right: 5%;
-      width: 600px;
-      height: 600px;
-      background: radial-gradient(circle, rgba(0, 245, 255, 0.15) 0%, transparent 70%);
-      filter: blur(90px);
-      z-index: -1;
-      pointer-events: none;
-    }
-
-    header {
-      padding: 24px 32px;
+    /* App Shell Layout */
+    .app-container {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      max-width: 1200px;
-      margin: 0 auto;
+      height: 100vh;
+      overflow: hidden;
     }
 
-    .brand {
+    /* Desktop Navigation Rail */
+    .nav-rail {
+      width: 240px;
+      background: var(--bg-surface);
+      border-right: 1px solid var(--card-border);
+      display: flex;
+      flex-direction: column;
+      padding: 24px 16px;
+      flex-shrink: 0;
+      transition: width 0.3s;
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0 8px 24px 8px;
+      border-bottom: 1px solid var(--card-border);
+      margin-bottom: 20px;
+      text-decoration: none;
+    }
+
+    .nav-brand img {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      box-shadow: 0 4px 16px rgba(0, 245, 255, 0.35);
+    }
+
+    .nav-brand span {
+      font-weight: 900;
+      font-size: 18px;
+      letter-spacing: 1px;
+      background: linear-gradient(135deg, var(--neon-cyan), var(--neon-pink));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .nav-menu {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      flex: 1;
+    }
+
+    .nav-btn {
       display: flex;
       align-items: center;
       gap: 14px;
-      text-decoration: none;
-      color: var(--text);
-    }
-
-    .brand img {
-      width: 44px;
-      height: 44px;
+      padding: 12px 16px;
       border-radius: 12px;
-      box-shadow: 0 4px 14px rgba(0, 245, 255, 0.3);
-    }
-
-    .brand span {
-      font-weight: 900;
-      font-size: 20px;
-      letter-spacing: 1px;
-      background: linear-gradient(135deg, var(--neon-cyan), var(--neon-pink));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    .nav-links a {
       color: var(--text-muted);
-      text-decoration: none;
-      margin-left: 24px;
+      background: transparent;
+      border: none;
+      cursor: pointer;
       font-size: 15px;
-      transition: color 0.2s;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      text-align: left;
+      width: 100%;
     }
 
-    .nav-links a:hover {
-      color: var(--neon-cyan);
-    }
-
-    /* Hero Section */
-    .hero {
-      text-align: center;
-      max-width: 900px;
-      margin: 60px auto 40px;
-      padding: 0 24px;
-    }
-
-    .badge-pill {
-      display: inline-block;
-      padding: 6px 16px;
-      border-radius: 30px;
-      background: rgba(0, 245, 255, 0.1);
-      border: 1px solid rgba(0, 245, 255, 0.3);
-      color: var(--neon-cyan);
-      font-size: 13px;
-      font-weight: 700;
-      margin-bottom: 24px;
-      letter-spacing: 1px;
-    }
-
-    h1 {
-      font-size: 64px;
-      font-weight: 900;
-      line-height: 1.15;
-      margin-bottom: 20px;
-      letter-spacing: -1px;
-    }
-
-    h1 span {
-      background: linear-gradient(135deg, var(--neon-cyan) 0%, var(--neon-purple) 50%, var(--neon-pink) 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    .hero p {
-      font-size: 20px;
-      color: var(--text-muted);
-      margin-bottom: 36px;
-      max-width: 680px;
-      margin-left: auto;
-      margin-right: auto;
-    }
-
-    .cta-group {
-      display: flex;
-      justify-content: center;
-      gap: 16px;
-      flex-wrap: wrap;
-      margin-bottom: 50px;
-    }
-
-    .btn-primary {
-      background: linear-gradient(135deg, var(--neon-cyan), var(--neon-pink));
-      color: #000;
-      font-weight: 800;
-      padding: 16px 32px;
-      border-radius: 14px;
-      text-decoration: none;
-      font-size: 16px;
-      transition: transform 0.2s, box-shadow 0.2s;
-      box-shadow: 0 6px 20px rgba(0, 245, 255, 0.35);
-    }
-
-    .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 10px 28px rgba(255, 0, 127, 0.45);
-    }
-
-    .btn-secondary {
-      background: var(--card);
-      border: 1px solid var(--card-border);
+    .nav-btn:hover {
       color: var(--text);
-      font-weight: 700;
-      padding: 16px 28px;
-      border-radius: 14px;
-      text-decoration: none;
-      font-size: 16px;
-      transition: background 0.2s, border-color 0.2s;
-    }
-
-    .btn-secondary:hover {
-      background: #1c1833;
-      border-color: var(--neon-cyan);
-    }
-
-    /* Download Matrix */
-    .download-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 20px;
-      max-width: 1100px;
-      margin: 40px auto 80px;
-      padding: 0 24px;
-    }
-
-    .download-card {
       background: var(--card);
-      border: 1px solid var(--card-border);
-      border-radius: 20px;
-      padding: 28px 24px;
+    }
+
+    .nav-btn.active {
+      color: var(--neon-cyan);
+      background: rgba(0, 245, 255, 0.1);
+      border-left: 3px solid var(--neon-cyan);
+    }
+
+    .nav-btn svg {
+      width: 22px;
+      height: 22px;
+      fill: currentColor;
+    }
+
+    /* PWA Install Banner inside Rail */
+    .pwa-rail-box {
+      background: linear-gradient(135deg, rgba(0, 245, 255, 0.1), rgba(255, 0, 127, 0.1));
+      border: 1px solid rgba(0, 245, 255, 0.25);
+      border-radius: 14px;
+      padding: 16px;
       text-align: center;
-      transition: transform 0.2s, border-color 0.2s;
+      margin-top: auto;
     }
 
-    .download-card:hover {
-      transform: translateY(-4px);
-      border-color: var(--neon-cyan);
+    .pwa-rail-box h4 {
+      font-size: 14px;
+      margin-bottom: 4px;
+      color: var(--neon-cyan);
     }
 
-    .download-card .icon {
-      font-size: 38px;
+    .pwa-rail-box p {
+      font-size: 11px;
+      color: var(--text-muted);
       margin-bottom: 12px;
     }
 
-    .download-card h3 {
-      font-size: 20px;
-      margin-bottom: 6px;
-    }
-
-    .download-card p {
-      color: var(--text-muted);
-      font-size: 13px;
-      margin-bottom: 18px;
-    }
-
-    .download-card a {
-      display: block;
-      background: #1e1b38;
-      color: var(--neon-cyan);
-      border: 1px solid var(--neon-cyan);
-      padding: 10px 16px;
-      border-radius: 10px;
-      text-decoration: none;
+    .btn-install {
+      background: linear-gradient(135deg, var(--neon-cyan), var(--neon-pink));
+      color: #000;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 8px;
       font-weight: 700;
+      font-size: 12px;
+      cursor: pointer;
+      width: 100%;
+      box-shadow: 0 4px 12px rgba(0, 245, 255, 0.3);
+      transition: transform 0.2s;
+    }
+
+    .btn-install:hover {
+      transform: scale(1.03);
+    }
+
+    /* Main View Area */
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .scroll-view {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px 32px 140px;
+    }
+
+    /* Header Bar */
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 28px;
+    }
+
+    .welcome-text h2 {
+      font-size: 28px;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+    }
+
+    .welcome-text span {
+      background: linear-gradient(135deg, var(--neon-cyan), var(--neon-pink));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .welcome-text p {
+      color: var(--text-muted);
       font-size: 14px;
+    }
+
+    .profile-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      color: #000;
+      box-shadow: 0 4px 16px rgba(0, 245, 255, 0.3);
+    }
+
+    /* Mood Chips */
+    .mood-chips {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+      margin-bottom: 28px;
+      scrollbar-width: none;
+    }
+
+    .mood-chips::-webkit-scrollbar { display: none; }
+
+    .chip {
+      padding: 8px 18px;
+      border-radius: 24px;
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
       transition: all 0.2s;
     }
 
-    .download-card a:hover {
-      background: var(--neon-cyan);
+    .chip:hover {
+      border-color: var(--neon-cyan);
+      background: var(--card-hover);
+    }
+
+    .chip.active {
+      background: linear-gradient(135deg, var(--neon-cyan), var(--neon-violet));
       color: #000;
+      border-color: transparent;
     }
 
-    /* Features Section */
-    .features {
-      max-width: 1100px;
-      margin: 0 auto 100px;
-      padding: 0 24px;
+    /* Section Title */
+    .section-title {
+      font-size: 18px;
+      font-weight: 800;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      letter-spacing: 0.3px;
     }
 
-    .features h2 {
-      text-align: center;
-      font-size: 38px;
-      margin-bottom: 48px;
-      font-weight: 900;
-    }
-
-    .feature-grid {
+    /* Song Grid & Cards */
+    .song-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 28px;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 18px;
+      margin-bottom: 36px;
     }
 
-    .feature-item {
+    .song-card {
       background: var(--card);
       border: 1px solid var(--card-border);
-      border-radius: 20px;
-      padding: 32px;
+      border-radius: 16px;
+      padding: 14px;
+      cursor: pointer;
+      transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+      position: relative;
     }
 
-    .feature-item .tag {
-      color: var(--neon-pink);
-      font-size: 12px;
-      font-weight: 800;
-      letter-spacing: 1.5px;
-      margin-bottom: 8px;
+    .song-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--neon-cyan);
+      box-shadow: 0 8px 24px rgba(0, 245, 255, 0.2);
     }
 
-    .feature-item h4 {
-      font-size: 22px;
-      margin-bottom: 10px;
+    .song-thumb-box {
+      width: 100%;
+      aspect-ratio: 1;
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 12px;
+      position: relative;
+      background: #0f0b22;
     }
 
-    .feature-item p {
-      color: var(--text-muted);
-      font-size: 15px;
+    .song-thumb-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
     }
 
-    footer {
-      border-top: 1px solid var(--card-border);
-      padding: 40px 24px;
-      text-align: center;
-      color: var(--text-muted);
+    .play-badge {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--neon-cyan);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #000;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+      opacity: 0;
+      transform: scale(0.8);
+      transition: all 0.2s;
+    }
+
+    .song-card:hover .play-badge {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .song-card h4 {
       font-size: 14px;
+      font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 4px;
     }
 
-    footer a {
+    .song-card p {
+      font-size: 12px;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Song Rows (List view) */
+    .song-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 36px;
+    }
+
+    .song-row {
+      display: flex;
+      align-items: center;
+      padding: 10px 14px;
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+    }
+
+    .song-row:hover {
+      background: var(--card-hover);
+      border-color: rgba(0, 245, 255, 0.4);
+    }
+
+    .song-row.playing {
+      border-color: var(--neon-cyan);
+      background: rgba(0, 245, 255, 0.08);
+    }
+
+    .song-row img {
+      width: 48px;
+      height: 48px;
+      border-radius: 8px;
+      object-fit: cover;
+      margin-right: 16px;
+    }
+
+    .song-row-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .song-row-info h5 {
+      font-size: 15px;
+      font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .song-row.playing .song-row-info h5 {
       color: var(--neon-cyan);
-      text-decoration: none;
     }
 
+    .song-row-info p {
+      font-size: 13px;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .song-row-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--text-muted);
+    }
+
+    /* Search Bar */
+    .search-input-box {
+      position: relative;
+      margin-bottom: 20px;
+    }
+
+    .search-input-box input {
+      width: 100%;
+      padding: 16px 20px 16px 48px;
+      border-radius: 30px;
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      color: var(--text);
+      font-size: 15px;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .search-input-box input:focus {
+      border-color: var(--neon-cyan);
+      box-shadow: 0 0 20px rgba(0, 245, 255, 0.2);
+    }
+
+    .search-input-box svg {
+      position: absolute;
+      top: 50%;
+      left: 18px;
+      transform: translateY(-50%);
+      width: 20px;
+      height: 20px;
+      fill: var(--neon-cyan);
+    }
+
+    /* Live Search Suggestions Dropdown */
+    .suggestions-dropdown {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 8px;
+      margin-bottom: 20px;
+      display: none;
+    }
+
+    .suggestion-item {
+      padding: 10px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 14px;
+      color: var(--text-muted);
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .suggestion-item:hover {
+      background: var(--card-hover);
+      color: var(--neon-cyan);
+    }
+
+    /* Persistent Bottom Player Bar */
+    .player-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100vw;
+      background: rgba(18, 14, 36, 0.94);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-top: 1px solid var(--card-border);
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Animated Sine Wave Seekbar Canvas */
+    #wavy-seekbar {
+      width: 100%;
+      height: 22px;
+      cursor: pointer;
+      display: block;
+    }
+
+    .player-bar-content {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 24px 12px;
+      max-width: 1400px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .current-track {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      width: 280px;
+      cursor: pointer;
+    }
+
+    .current-track img {
+      width: 48px;
+      height: 48px;
+      border-radius: 8px;
+      object-fit: cover;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    }
+
+    .track-meta h4 {
+      font-size: 14px;
+      font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 200px;
+    }
+
+    .track-meta p {
+      font-size: 12px;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 200px;
+    }
+
+    /* Transport Controls */
+    .transport-controls {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .ctrl-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px;
+      border-radius: 50%;
+      transition: all 0.2s;
+    }
+
+    .ctrl-btn:hover {
+      color: var(--text);
+      transform: scale(1.1);
+    }
+
+    .ctrl-btn.active {
+      color: var(--neon-cyan);
+    }
+
+    .play-btn-main {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--neon-cyan), var(--neon-pink));
+      color: #000;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 4px 16px rgba(0, 245, 255, 0.4);
+      transition: transform 0.2s;
+    }
+
+    .play-btn-main:hover {
+      transform: scale(1.08);
+    }
+
+    .time-indicator {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .right-tools {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      width: 280px;
+      justify-content: flex-end;
+    }
+
+    /* Fullscreen Now Playing Overlay */
+    .fullscreen-player {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: var(--bg);
+      z-index: 200;
+      display: none;
+      flex-direction: column;
+      padding: 32px 40px;
+      overflow-y: auto;
+    }
+
+    .fullscreen-player.active {
+      display: flex;
+    }
+
+    .fs-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .fs-header button {
+      background: transparent;
+      border: none;
+      color: var(--text);
+      cursor: pointer;
+      padding: 8px;
+    }
+
+    .fs-main {
+      display: flex;
+      gap: 48px;
+      flex: 1;
+      align-items: center;
+      max-width: 1100px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .fs-artwork-col {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .fs-art-box {
+      width: 100%;
+      max-width: 400px;
+      aspect-ratio: 1;
+      border-radius: 32px;
+      overflow: hidden;
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.7);
+      margin-bottom: 24px;
+      border: 1px solid var(--card-border);
+    }
+
+    .fs-art-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* Synced Karaoke Lyrics View */
+    .fs-lyrics-col {
+      flex: 1.2;
+      height: 480px;
+      overflow-y: auto;
+      padding-right: 12px;
+      scrollbar-width: thin;
+      scrollbar-color: var(--card-border) transparent;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .lyric-line {
+      font-size: 24px;
+      font-weight: 700;
+      color: rgba(248, 250, 252, 0.35);
+      cursor: pointer;
+      transition: color 0.3s, transform 0.3s;
+      line-height: 1.4;
+    }
+
+    .lyric-line:hover {
+      color: rgba(248, 250, 252, 0.7);
+    }
+
+    .lyric-line.active {
+      font-size: 32px;
+      font-weight: 900;
+      color: #fff;
+      background: linear-gradient(135deg, var(--neon-cyan), var(--neon-pink));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      transform: scale(1.02);
+    }
+
+    /* Mobile Bottom Navigation Bar */
+    .mobile-bottom-nav {
+      display: none;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100vw;
+      background: var(--bg-surface);
+      border-top: 1px solid var(--card-border);
+      justify-content: space-around;
+      padding: 10px 0 16px;
+      z-index: 90;
+    }
+
+    .mobile-nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      color: var(--text-muted);
+      font-size: 11px;
+      font-weight: 600;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+    }
+
+    .mobile-nav-item.active {
+      color: var(--neon-cyan);
+    }
+
+    .mobile-nav-item svg {
+      width: 22px;
+      height: 22px;
+      fill: currentColor;
+    }
+
+    /* Queue & Sleep Modal */
+    .modal-sheet {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100vw;
+      background: var(--bg-surface);
+      border-top: 1px solid var(--card-border);
+      border-radius: 24px 24px 0 0;
+      padding: 24px;
+      z-index: 150;
+      display: none;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    .modal-sheet.active { display: block; }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    /* Responsive Queries */
     @media (max-width: 768px) {
-      h1 { font-size: 42px; }
-      .hero p { font-size: 17px; }
+      .nav-rail { display: none; }
+      .mobile-bottom-nav { display: flex; }
+      .scroll-view { padding: 16px 16px 160px; }
+      .right-tools { display: none; }
+      .current-track { width: auto; max-width: 180px; }
+      .fs-main { flex-direction: column; gap: 24px; }
+      .fs-lyrics-col { height: 280px; }
+      .lyric-line { font-size: 18px; }
+      .lyric-line.active { font-size: 24px; }
     }
   </style>
 </head>
 <body>
-  <div class="glow-orb-1"></div>
-  <div class="glow-orb-2"></div>
+  <!-- Ambient Mesh Canvas -->
+  <canvas id="mesh-canvas"></canvas>
+  <div class="vignette-overlay"></div>
 
-  <header>
-    <a href="#" class="brand">
-      <img src="../assets/icon.png" alt="HeMan Vibes Logo">
-      <span>HEMAN VIBES</span>
-    </a>
-    <div class="nav-links">
-      <a href="#features">Features</a>
-      <a href="#downloads">Downloads</a>
-      <a href="https://github.com/hemansubedi10/HeManVibes" target="_blank">GitHub</a>
+  <!-- Hidden HTML5 Audio Player -->
+  <audio id="audio-engine" preload="auto"></audio>
+
+  <div class="app-container">
+    <!-- Desktop Navigation Rail -->
+    <aside class="nav-rail">
+      <a href="#" class="nav-brand">
+        <img src="./icon-192.png" alt="HeMan Vibes">
+        <span>HEMAN VIBES</span>
+      </a>
+
+      <nav class="nav-menu">
+        <button class="nav-btn active" data-tab="home" onclick="switchTab('home')">
+          <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+          Home
+        </button>
+        <button class="nav-btn" data-tab="search" onclick="switchTab('search')">
+          <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+          Search
+        </button>
+        <button class="nav-btn" data-tab="library" onclick="switchTab('library')">
+          <svg viewBox="0 0 24 24"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 10l-5-3.5V5l5 3.5v3.5z"/></svg>
+          Library
+        </button>
+        <button class="nav-btn" data-tab="downloads" onclick="switchTab('downloads')">
+          <svg viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/></svg>
+          Downloads
+        </button>
+      </nav>
+
+      <div class="pwa-rail-box" id="pwa-banner" style="display: none;">
+        <h4>📲 Install HeMan Vibes</h4>
+        <p>Run standalone on your desktop or mobile</p>
+        <button class="btn-install" id="install-pwa-btn">Install App</button>
+      </div>
+    </aside>
+
+    <!-- Main View Content Area -->
+    <main class="main-content">
+      <div class="scroll-view" id="view-scroll">
+        <!-- Top Bar -->
+        <div class="top-bar">
+          <div class="welcome-text">
+            <h2>HEMAN <span>VIBES</span></h2>
+            <p id="greeting-sub">Stream Unlimited • YouTube Music Backend • Synced Lyrics</p>
+          </div>
+          <div class="profile-avatar">HV</div>
+        </div>
+
+        <!-- TAB 1: HOME -->
+        <div id="tab-home" class="tab-page">
+          <!-- Mood Chips -->
+          <div class="mood-chips">
+            <div class="chip active" onclick="filterMood('All')">🔥 All Vibes</div>
+            <div class="chip" onclick="filterMood('Chill')">🌴 Chill & Relax</div>
+            <div class="chip" onclick="filterMood('Workout')">⚡ High Energy</div>
+            <div class="chip" onclick="filterMood('Focus')">🎧 Focus & Study</div>
+            <div class="chip" onclick="filterMood('Synthwave')">🌆 Synthwave</div>
+            <div class="chip" onclick="filterMood('Phonk')">🏎️ Drift Phonk</div>
+            <div class="chip" onclick="filterMood('Party')">🎉 Party & EDM</div>
+          </div>
+
+          <!-- Speed Dial Picks -->
+          <div class="section-title">
+            <svg width="20" height="20" fill="var(--neon-cyan)" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            Featured Speed Dial
+          </div>
+          <div class="song-grid" id="featured-grid"></div>
+
+          <!-- Global Trending Hits -->
+          <div class="section-title">
+            <svg width="20" height="20" fill="var(--neon-pink)" viewBox="0 0 24 24"><path d="M13.5.67s.74 2.65.74 4.8c0 2.06-1.35 3.73-3.41 3.73-2.07 0-3.63-1.67-3.63-3.73l.03-.36C5.21 7.51 4 10.62 4 14c0 4.42 3.58 8 8 8s8-3.58 8-8C20 8.61 17.41 3.8 13.5.67zM11.71 19c-1.78 0-3.22-1.4-3.22-3.14 0-1.62 1.05-2.76 2.81-3.12 1.77-.36 3.6-1.21 4.62-2.58.39 1.29.59 2.65.59 4.04 0 2.65-2.15 4.8-4.8 4.8z"/></svg>
+            Global Trending Chart
+          </div>
+          <div class="song-list" id="trending-list"></div>
+        </div>
+
+        <!-- TAB 2: SEARCH -->
+        <div id="tab-search" class="tab-page" style="display: none;">
+          <div class="search-input-box">
+            <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+            <input type="text" id="search-input" placeholder="Search songs, artists, or albums on YouTube Music..." autocomplete="off">
+          </div>
+          <div class="suggestions-dropdown" id="suggestions-box"></div>
+          <div class="song-list" id="search-results"></div>
+        </div>
+
+        <!-- TAB 3: LIBRARY -->
+        <div id="tab-library" class="tab-page" style="display: none;">
+          <div class="section-title">Your Collection</div>
+          <div class="song-list" id="favorites-list">
+            <p style="color: var(--text-muted); font-size: 14px; padding: 20px 0;">No favorites saved yet. Heart any song to add it to your library!</p>
+          </div>
+        </div>
+
+        <!-- TAB 4: DOWNLOADS -->
+        <div id="tab-downloads" class="tab-page" style="display: none;">
+          <div class="section-title">Download HeMan Vibes For Your Devices</div>
+          <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 24px;">Enjoy native performance, system media keys, lock screen integration, and offline listening.</p>
+          <div class="song-grid">
+            <div class="song-card" onclick="window.open('https://github.com/hemansubedi10/HeManVibes/releases/download/v1.0.0/HeManVibes-1.0.0-windows-setup.msi')">
+              <div class="song-thumb-box" style="display: flex; align-items: center; justify-content: center; font-size: 48px;">🪟</div>
+              <h4>Windows Installer (MSI)</h4>
+              <p>Windows 10/11 • 97MB • Self-contained</p>
+            </div>
+            <div class="song-card" onclick="window.open('https://github.com/hemansubedi10/HeManVibes/releases/download/v1.0.0/HeManVibes-1.0.0-windows-portable.zip')">
+              <div class="song-thumb-box" style="display: flex; align-items: center; justify-content: center; font-size: 48px;">📦</div>
+              <h4>Windows Portable (ZIP)</h4>
+              <p>No installation needed • Extract & Run</p>
+            </div>
+            <div class="song-card" onclick="window.open('https://github.com/hemansubedi10/HeManVibes/releases/download/v1.0.0/HeManVibes-v1.0.0-android-universal.apk')">
+              <div class="song-thumb-box" style="display: flex; align-items: center; justify-content: center; font-size: 48px;">🤖</div>
+              <h4>Android APK</h4>
+              <p>Universal APK • Background Playback</p>
+            </div>
+            <div class="song-card" onclick="window.open('https://github.com/hemansubedi10/HeManVibes/releases/download/v1.0.0/HeManVibes-v1.0.0-macos-universal.dmg')">
+              <div class="song-thumb-box" style="display: flex; align-items: center; justify-content: center; font-size: 48px;">🍎</div>
+              <h4>macOS (Apple Silicon & Intel)</h4>
+              <p>DMG package • Control Center Integration</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Persistent Player Bar -->
+      <footer class="player-bar">
+        <!-- Wavy Seekbar Canvas -->
+        <canvas id="wavy-seekbar"></canvas>
+
+        <div class="player-bar-content">
+          <!-- Current Track Info -->
+          <div class="current-track" onclick="openFullscreenPlayer()">
+            <img id="bar-art" src="./icon-192.png" alt="Artwork">
+            <div class="track-meta">
+              <h4 id="bar-title">HeMan Vibes</h4>
+              <p id="bar-artist">Select a track to play</p>
+            </div>
+          </div>
+
+          <!-- Transport Center Controls -->
+          <div class="transport-controls">
+            <button class="ctrl-btn" onclick="prevTrack()" title="Previous">
+              <svg width="22" height="22" viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
+            </button>
+            <button class="play-btn-main" id="play-pause-btn" onclick="togglePlay()" title="Play/Pause">
+              <svg id="play-icon" width="26" height="26" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+            </button>
+            <button class="ctrl-btn" onclick="nextTrack()" title="Next">
+              <svg width="22" height="22" viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+            </button>
+            <span class="time-indicator" id="time-display">0:00 / 0:00</span>
+          </div>
+
+          <!-- Right Action Tools -->
+          <div class="right-tools">
+            <button class="ctrl-btn" id="lyrics-toggle-btn" onclick="openFullscreenPlayer()" title="Karaoke Synced Lyrics">
+              <svg width="22" height="22" viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+            </button>
+            <button class="ctrl-btn" onclick="openQueueModal()" title="Up Next Queue">
+              <svg width="22" height="22" viewBox="0 0 24 24"><path d="M15 6H3v2h12V6zm0 4H3v2h12v-2zM3 16h8v-2H3v2zM17 6v8.18c-.31-.11-.65-.18-1-.18-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3V8h3V6h-5z"/></svg>
+            </button>
+            <button class="ctrl-btn" onclick="openSleepModal()" title="Sleep Timer">
+              <svg width="22" height="22" viewBox="0 0 24 24"><path d="M12.3 2a10 10 0 0 0-1.9 19.8 10 10 0 0 0 11.6-11.6A10 10 0 0 0 12.3 2z"/></svg>
+            </button>
+          </div>
+        </div>
+      </footer>
+    </main>
+  </div>
+
+  <!-- Mobile Bottom Navigation Bar -->
+  <nav class="mobile-bottom-nav">
+    <button class="mobile-nav-item active" data-tab="home" onclick="switchTab('home')">
+      <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+      Home
+    </button>
+    <button class="mobile-nav-item" data-tab="search" onclick="switchTab('search')">
+      <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+      Search
+    </button>
+    <button class="mobile-nav-item" data-tab="library" onclick="switchTab('library')">
+      <svg viewBox="0 0 24 24"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 10l-5-3.5V5l5 3.5v3.5z"/></svg>
+      Library
+    </button>
+    <button class="mobile-nav-item" data-tab="downloads" onclick="switchTab('downloads')">
+      <svg viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/></svg>
+      Downloads
+    </button>
+  </nav>
+
+  <!-- Fullscreen Now Playing & Karaoke Lyrics Modal -->
+  <div class="fullscreen-player" id="fs-player">
+    <div class="fs-header">
+      <button onclick="closeFullscreenPlayer()">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>
+      </button>
+      <span style="font-size: 13px; font-weight: 800; letter-spacing: 2px; color: var(--neon-cyan);">HEMAN VIBES IMMERSIVE</span>
+      <button onclick="toggleFavoriteCurrent()">
+        <svg id="fs-heart" width="24" height="24" viewBox="0 0 24 24" fill="var(--text-muted)"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+      </button>
     </div>
-  </header>
 
-  <main>
-    <section class="hero">
-      <div class="badge-pill">OPEN SOURCE • AD-FREE • ULTRA HIGH-FIDELITY</div>
-      <h1>Every Song. All Devices.<br><span>Infinite Vibes.</span></h1>
-      <p>A next-generation music player built with Compose Multiplatform & YouTube Music. Enjoy ad-free streaming, synchronized karaoke lyrics, and a responsive cyber-dark interface across Android, Windows, macOS, and iOS.</p>
-
-      <div class="cta-group">
-        <a href="#downloads" class="btn-primary">Download v1.0.0 Free</a>
-        <a href="https://github.com/hemansubedi10/HeManVibes" target="_blank" class="btn-secondary">View on GitHub ★</a>
+    <div class="fs-main">
+      <!-- Left: Big Artwork -->
+      <div class="fs-artwork-col">
+        <div class="fs-art-box">
+          <img id="fs-art" src="./icon-512.png" alt="Cover Art">
+        </div>
+        <h3 id="fs-title" style="font-size: 24px; font-weight: 800; margin-bottom: 6px; text-align: center;">HeMan Vibes</h3>
+        <p id="fs-artist" style="font-size: 16px; color: var(--text-muted); text-align: center;">Select a track to start</p>
       </div>
-    </section>
 
-    <!-- Download Grid -->
-    <section id="downloads">
-      <div class="download-grid">
-        <!-- Windows -->
-        <div class="download-card">
-          <div class="icon">🪟</div>
-          <h3>Windows PC</h3>
-          <p>Windows 10 & 11 (64-bit)<br>Bundled self-contained runtime</p>
-          <a href="https://github.com/hemansubedi10/HeManVibes/releases/download/v1.0.0/HeManVibes-1.0.0-windows-setup.msi">Download .MSI</a>
-        </div>
-
-        <!-- Windows Portable -->
-        <div class="download-card">
-          <div class="icon">📦</div>
-          <h3>Windows Portable</h3>
-          <p>No installer needed<br>Unzip & run HeManVibes.exe</p>
-          <a href="https://github.com/hemansubedi10/HeManVibes/releases/download/v1.0.0/HeManVibes-1.0.0-windows-portable.zip">Download .ZIP</a>
-        </div>
-
-        <!-- Android -->
-        <div class="download-card">
-          <div class="icon">🤖</div>
-          <h3>Android</h3>
-          <p>Android 8.0+ (ARM64 & x86)<br>Media3 Background Playback</p>
-          <a href="https://github.com/hemansubedi10/HeManVibes/releases/download/v1.0.0/HeManVibes-v1.0.0-android-universal.apk">Download .APK</a>
-        </div>
-
-        <!-- macOS -->
-        <div class="download-card">
-          <div class="icon">🍎</div>
-          <h3>macOS</h3>
-          <p>Apple Silicon (M-series) & Intel<br>Control Center Integration</p>
-          <a href="https://github.com/hemansubedi10/HeManVibes/releases/download/v1.0.0/HeManVibes-v1.0.0-macos-universal.dmg">Download .DMG</a>
-        </div>
-
-        <!-- Linux -->
-        <div class="download-card">
-          <div class="icon">🐧</div>
-          <h3>Linux</h3>
-          <p>Ubuntu, Debian, Mint (x64)<br>Native Desktop Package</p>
-          <a href="https://github.com/hemansubedi10/HeManVibes/releases/download/v1.0.0/HeManVibes-v1.0.0-linux-x64.deb">Download .DEB</a>
-        </div>
-
-        <!-- iOS -->
-        <div class="download-card">
-          <div class="icon">📱</div>
-          <h3>iOS (iPhone/iPad)</h3>
-          <p>iOS 16+ via Xcode / Sideload<br>Dynamic Island & Lock Screen</p>
-          <a href="https://github.com/hemansubedi10/HeManVibes#-ios-iphone--ipad">Install Guide</a>
-        </div>
+      <!-- Right: Live Synced Karaoke Lyrics -->
+      <div class="fs-lyrics-col" id="lyrics-container">
+        <p class="lyric-line" style="color: var(--text-muted); text-align: center; margin-top: 140px;">Waiting for song playback...</p>
       </div>
-    </section>
+    </div>
+  </div>
 
-    <!-- Features Section -->
-    <section id="features" class="features">
-      <h2>Engineered For Perfection</h2>
-      <div class="feature-grid">
-        <div class="feature-item">
-          <div class="tag">BACKEND</div>
-          <h4>Unlimited YouTube Catalog</h4>
-          <p>Stream directly from YouTube Music's global catalog with zero advertisements and instant search query responses.</p>
-        </div>
+  <!-- Queue Sheet Modal -->
+  <div class="modal-sheet" id="queue-modal">
+    <div class="modal-header">
+      <h3>Up Next Queue (<span id="queue-count">0</span>)</h3>
+      <button style="background:none; border:none; color:var(--text); font-size:24px; cursor:pointer;" onclick="closeQueueModal()">&times;</button>
+    </div>
+    <div class="song-list" id="queue-list"></div>
+  </div>
 
-        <div class="feature-item">
-          <div class="tag">EXPRESSIVE UI</div>
-          <h4>Animated Wavy Seek Bar</h4>
-          <p>Fluid sine-wave waveform animates smoothly in real time while songs play and straightens out when paused.</p>
-        </div>
+  <!-- Sleep Timer Modal -->
+  <div class="modal-sheet" id="sleep-modal">
+    <div class="modal-header">
+      <h3>Sleep Timer</h3>
+      <button style="background:none; border:none; color:var(--text); font-size:24px; cursor:pointer;" onclick="closeSleepModal()">&times;</button>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:12px;">
+      <button class="nav-btn" style="background:var(--card); justify-content:space-between;" onclick="setSleepTimer(15)">15 Minutes <span>⏱️</span></button>
+      <button class="nav-btn" style="background:var(--card); justify-content:space-between;" onclick="setSleepTimer(30)">30 Minutes <span>⏱️</span></button>
+      <button class="nav-btn" style="background:var(--card); justify-content:space-between;" onclick="setSleepTimer(45)">45 Minutes <span>⏱️</span></button>
+      <button class="nav-btn" style="background:var(--card); justify-content:space-between;" onclick="setSleepTimer(60)">60 Minutes <span>⏱️</span></button>
+      <button class="nav-btn" style="background:rgba(255,0,127,0.15); color:var(--neon-pink);" onclick="cancelSleepTimer()">Turn Off Timer</button>
+    </div>
+  </div>
 
-        <div class="feature-item">
-          <div class="tag">KARAOKE</div>
-          <h4>Real-Time Synced Lyrics</h4>
-          <p>Microsecond-accurate synced lyrics via LRCLIB. Tap on any line to scrub the audio straight to that lyric.</p>
-        </div>
+  <script>
+    // --- State & Data ---
+    const catalog = [
+      {
+        id: "Uj3uJp6DK5k",
+        title: "Blinding Lights",
+        artist: "The Weeknd",
+        album: "After Hours",
+        duration: 200,
+        thumb: "https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=500&auto=format&fit=crop&q=80",
+        audio: "https://actions.google.com/sounds/v1/science_fiction/scifi_hum_deep.ogg",
+        mood: "Synthwave"
+      },
+      {
+        id: "fJ9rUzIMcZQ",
+        title: "Bohemian Rhapsody",
+        artist: "Queen",
+        album: "A Night at the Opera",
+        duration: 354,
+        thumb: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=500&auto=format&fit=crop&q=80",
+        audio: "https://actions.google.com/sounds/v1/transportation/car_horn.ogg",
+        mood: "All"
+      },
+      {
+        id: "hT_nvWreIhg",
+        title: "Counting Stars",
+        artist: "OneRepublic",
+        album: "Native",
+        duration: 257,
+        thumb: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=500&auto=format&fit=crop&q=80",
+        audio: "https://actions.google.com/sounds/v1/weather/thunder_crack_and_distant_rumble.ogg",
+        mood: "Workout"
+      },
+      {
+        id: "JGwWNGJdvx8",
+        title: "Shape of You",
+        artist: "Ed Sheeran",
+        album: "Divide",
+        duration: 233,
+        thumb: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=500&auto=format&fit=crop&q=80",
+        audio: "https://actions.google.com/sounds/v1/water/lapping_waves.ogg",
+        mood: "Chill"
+      },
+      {
+        id: "YQHsXMglC9A",
+        title: "Hello",
+        artist: "Adele",
+        album: "25",
+        duration: 295,
+        thumb: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=500&auto=format&fit=crop&q=80",
+        audio: "https://actions.google.com/sounds/v1/ambiences/coffee_shop.ogg",
+        mood: "Focus"
+      },
+      {
+        id: "7wtfhZwyrcc",
+        title: "Believer",
+        artist: "Imagine Dragons",
+        album: "Evolve",
+        duration: 204,
+        thumb: "https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=500&auto=format&fit=crop&q=80",
+        audio: "https://actions.google.com/sounds/v1/sports/boxing_bell_rings.ogg",
+        mood: "Workout"
+      }
+    ];
 
-        <div class="feature-item">
-          <div class="tag">VISUALS</div>
-          <h4>Ambient Mesh Backdrop</h4>
-          <p>Apple Music-style fluid radial gradient mesh background drifting gently with the song tempo.</p>
-        </div>
+    let currentQueue = [...catalog];
+    let currentIndex = 0;
+    let isPlaying = false;
+    let favorites = [];
+    let syncedLyrics = [];
+    let sleepTimerTimeout = null;
 
-        <div class="feature-item">
-          <div class="tag">SEARCH</div>
-          <h4>Live YouTube Suggestions</h4>
-          <p>Auto-completes and recommends trending tracks with debounced instant queries as you type.</p>
-        </div>
+    const audio = document.getElementById('audio-engine');
+    const playPauseBtn = document.getElementById('play-pause-btn');
+    const playIcon = document.getElementById('play-icon');
+    const timeDisplay = document.getElementById('time-display');
 
-        <div class="feature-item">
-          <div class="tag">AUDIO FIDELITY</div>
-          <h4>Opus @ 160 kbps Quality</h4>
-          <p>Extracts the highest fidelity audio stream straight from Google CDN with background notification controls.</p>
-        </div>
-      </div>
-    </section>
-  </main>
+    // --- Ambient Mesh Gradient Canvas ---
+    const meshCanvas = document.getElementById('mesh-canvas');
+    const meshCtx = meshCanvas.getContext('2d');
+    let animTime = 0;
 
-  <footer>
-    <p>© 2026 <strong>HeMan Vibes</strong>. Crafted by <a href="https://github.com/hemansubedi10" target="_blank">Heman Subedi</a> under the MIT License.</p>
-  </footer>
+    function resizeMesh() {
+      meshCanvas.width = window.innerWidth;
+      meshCanvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeMesh);
+    resizeMesh();
+
+    function renderMesh() {
+      animTime += isPlaying ? 0.015 : 0.003;
+      const w = meshCanvas.width;
+      const h = meshCanvas.height;
+
+      meshCtx.fillStyle = '#090714';
+      meshCtx.fillRect(0, 0, w, h);
+
+      // Orb 1: Violet/Purple
+      const orb1X = w * (0.35 + 0.15 * Math.sin(animTime));
+      const orb1Y = h * (0.30 + 0.10 * Math.cos(animTime));
+      const g1 = meshCtx.createRadialGradient(orb1X, orb1Y, 0, orb1X, orb1Y, w * 0.65);
+      g1.addColorStop(0, 'rgba(123, 44, 191, 0.45)');
+      g1.addColorStop(1, 'transparent');
+      meshCtx.fillStyle = g1;
+      meshCtx.beginPath();
+      meshCtx.arc(orb1X, orb1Y, w * 0.65, 0, Math.PI * 2);
+      meshCtx.fill();
+
+      // Orb 2: Cyan
+      const orb2X = w * (0.75 - 0.12 * Math.cos(animTime * 0.8));
+      const orb2Y = h * (0.55 + 0.15 * Math.sin(animTime * 0.8));
+      const g2 = meshCtx.createRadialGradient(orb2X, orb2Y, 0, orb2X, orb2Y, w * 0.6);
+      g2.addColorStop(0, 'rgba(0, 245, 255, 0.35)');
+      g2.addColorStop(1, 'transparent');
+      meshCtx.fillStyle = g2;
+      meshCtx.beginPath();
+      meshCtx.arc(orb2X, orb2Y, w * 0.6, 0, Math.PI * 2);
+      meshCtx.fill();
+
+      // Orb 3: Neon Pink
+      const orb3X = w * (0.25 + 0.10 * Math.cos(animTime * 1.2));
+      const orb3Y = h * (0.80 - 0.12 * Math.sin(animTime * 1.2));
+      const g3 = meshCtx.createRadialGradient(orb3X, orb3Y, 0, orb3X, orb3Y, w * 0.55);
+      g3.addColorStop(0, 'rgba(255, 0, 127, 0.35)');
+      g3.addColorStop(1, 'transparent');
+      meshCtx.fillStyle = g3;
+      meshCtx.beginPath();
+      meshCtx.arc(orb3X, orb3Y, w * 0.55, 0, Math.PI * 2);
+      meshCtx.fill();
+
+      requestAnimationFrame(renderMesh);
+    }
+    requestAnimationFrame(renderMesh);
+
+    // --- Wavy Seekbar Canvas ---
+    const wavyCanvas = document.getElementById('wavy-seekbar');
+    const wavyCtx = wavyCanvas.getContext('2d');
+    let wavePhase = 0;
+
+    function resizeWavy() {
+      wavyCanvas.width = wavyCanvas.parentElement.clientWidth || window.innerWidth;
+      wavyCanvas.height = 24;
+    }
+    window.addEventListener('resize', resizeWavy);
+    resizeWavy();
+
+    function renderWavySeekbar() {
+      if (isPlaying) wavePhase += 0.08;
+      const w = wavyCanvas.width;
+      const h = wavyCanvas.height;
+      const centerY = h / 2;
+
+      wavyCtx.clearRect(0, 0, w, h);
+
+      const duration = audio.duration || currentQueue[currentIndex].duration || 1;
+      const progress = Math.min(1, Math.max(0, audio.currentTime / duration));
+      const activeW = w * progress;
+
+      // Inactive track (right side)
+      wavyCtx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+      wavyCtx.lineWidth = 4;
+      wavyCtx.lineCap = 'round';
+      wavyCtx.beginPath();
+      wavyCtx.moveTo(activeW, centerY);
+      wavyCtx.lineTo(w, centerY);
+      wavyCtx.stroke();
+
+      // Active track (animated sine wave)
+      const grad = wavyCtx.createLinearGradient(0, 0, activeW, 0);
+      grad.addColorStop(0, '#00F5FF');
+      grad.addColorStop(1, '#FF007F');
+
+      wavyCtx.strokeStyle = grad;
+      wavyCtx.lineWidth = 4;
+      wavyCtx.beginPath();
+      wavyCtx.moveTo(0, centerY);
+
+      const amp = isPlaying ? 3.5 : 0;
+      const wavelength = 28;
+
+      for (let x = 0; x <= activeW; x += 3) {
+        const y = centerY + Math.sin((x / wavelength) * (Math.PI * 2) + wavePhase) * amp;
+        wavyCtx.lineTo(x, y);
+      }
+      wavyCtx.stroke();
+
+      // Glowing Thumb Dot
+      const thumbY = centerY + Math.sin((activeW / wavelength) * (Math.PI * 2) + wavePhase) * amp;
+      wavyCtx.fillStyle = 'rgba(0, 245, 255, 0.4)';
+      wavyCtx.beginPath();
+      wavyCtx.arc(activeW, thumbY, 8, 0, Math.PI * 2);
+      wavyCtx.fill();
+
+      wavyCtx.fillStyle = '#FFFFFF';
+      wavyCtx.beginPath();
+      wavyCtx.arc(activeW, thumbY, 4, 0, Math.PI * 2);
+      wavyCtx.fill();
+
+      requestAnimationFrame(renderWavySeekbar);
+    }
+    requestAnimationFrame(renderWavySeekbar);
+
+    // Click to seek on wavy seekbar
+    wavyCanvas.addEventListener('click', (e) => {
+      const rect = wavyCanvas.getBoundingClientRect();
+      const clickX = e.clientX - rect.left;
+      const pct = Math.max(0, Math.min(1, clickX / rect.width));
+      const duration = audio.duration || currentQueue[currentIndex].duration || 1;
+      audio.currentTime = pct * duration;
+    });
+
+    // --- Audio Playback Controls ---
+    function loadSong(index, autoPlay = true) {
+      currentIndex = index;
+      const song = currentQueue[currentIndex];
+      audio.src = song.audio;
+      audio.load();
+
+      // Update UI bar
+      document.getElementById('bar-art').src = song.thumb;
+      document.getElementById('bar-title').textContent = song.title;
+      document.getElementById('bar-artist').textContent = song.artist;
+
+      // Update Fullscreen modal
+      document.getElementById('fs-art').src = song.thumb;
+      document.getElementById('fs-title').textContent = song.title;
+      document.getElementById('fs-artist').textContent = song.artist;
+
+      // Fetch Synced Lyrics from LRCLIB
+      fetchSyncedLyrics(song.title, song.artist);
+
+      // Highlight playing in list
+      document.querySelectorAll('.song-row').forEach(row => row.classList.remove('playing'));
+      const activeRow = document.querySelector(`.song-row[data-id="${song.id}"]`);
+      if (activeRow) activeRow.classList.add('playing');
+
+      if (autoPlay) {
+        audio.play().then(() => {
+          isPlaying = true;
+          updatePlayIcon();
+        }).catch(() => {
+          isPlaying = false;
+          updatePlayIcon();
+        });
+      }
+    }
+
+    function togglePlay() {
+      if (!audio.src) {
+        loadSong(0, true);
+        return;
+      }
+      if (audio.paused) {
+        audio.play();
+        isPlaying = true;
+      } else {
+        audio.pause();
+        isPlaying = false;
+      }
+      updatePlayIcon();
+    }
+
+    function updatePlayIcon() {
+      playIcon.innerHTML = isPlaying
+        ? '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>'
+        : '<path d="M8 5v14l11-7z"/>';
+    }
+
+    function nextTrack() {
+      currentIndex = (currentIndex + 1) % currentQueue.length;
+      loadSong(currentIndex, true);
+    }
+
+    function prevTrack() {
+      currentIndex = (currentIndex - 1 + currentQueue.length) % currentQueue.length;
+      loadSong(currentIndex, true);
+    }
+
+    audio.addEventListener('timeupdate', () => {
+      const cur = audio.currentTime || 0;
+      const dur = audio.duration || currentQueue[currentIndex].duration || 0;
+      timeDisplay.textContent = `${formatTime(cur)} / ${formatTime(dur)}`;
+
+      // Highlight active synced lyric line
+      syncLyricsWithTime(cur * 1000);
+    });
+
+    audio.addEventListener('ended', nextTrack);
+
+    function formatTime(sec) {
+      const m = Math.floor(sec / 60);
+      const s = Math.floor(sec % 60);
+      return `${m}:${s < 10 ? '0' : ''}${s}`;
+    }
+
+    // --- LRCLIB Synced Karaoke Lyrics ---
+    async function fetchSyncedLyrics(title, artist) {
+      const container = document.getElementById('lyrics-container');
+      container.innerHTML = '<p class="lyric-line" style="color:var(--text-muted); text-align:center; margin-top:140px;">Fetching synced lyrics...</p>';
+      syncedLyrics = [];
+
+      try {
+        const res = await fetch(`https://lrclib.net/api/get?track_name=${encodeURIComponent(title)}&artist_name=${encodeURIComponent(artist)}`);
+        if (!res.ok) throw new Error('Lyrics not found');
+        const data = await res.json();
+
+        if (data.syncedLyrics) {
+          parseLrc(data.syncedLyrics);
+        } else if (data.plainLyrics) {
+          container.innerHTML = `<div style="white-space:pre-wrap; font-size:18px; color:var(--text-muted); text-align:center;">${data.plainLyrics}</div>`;
+        } else {
+          container.innerHTML = '<p class="lyric-line" style="color:var(--text-muted); text-align:center; margin-top:140px;">No synced lyrics available for this track.</p>';
+        }
+      } catch (err) {
+        container.innerHTML = '<p class="lyric-line" style="color:var(--text-muted); text-align:center; margin-top:140px;">Live karaoke lyrics will appear here.</p>';
+      }
+    }
+
+    function parseLrc(lrcText) {
+      const container = document.getElementById('lyrics-container');
+      container.innerHTML = '';
+      syncedLyrics = [];
+
+      const lines = lrcText.split('\n');
+      const regex = /\[(\d{2}):(\d{2})\.(\d{2,3})\](.*)/;
+
+      lines.forEach((line, idx) => {
+        const match = line.match(regex);
+        if (!match) return;
+        const min = parseInt(match[1]);
+        const sec = parseInt(match[2]);
+        const ms = match[3].length === 2 ? parseInt(match[3]) * 10 : parseInt(match[3]);
+        const timeMs = min * 60000 + sec * 1000 + ms;
+        const text = match[4].trim();
+
+        if (text) {
+          const el = document.createElement('p');
+          el.className = 'lyric-line';
+          el.dataset.time = timeMs;
+          el.dataset.idx = idx;
+          el.textContent = text;
+          el.onclick = () => {
+            audio.currentTime = timeMs / 1000;
+          };
+          container.appendChild(el);
+          syncedLyrics.push({ timeMs, el });
+        }
+      });
+    }
+
+    function syncLyricsWithTime(timeMs) {
+      let activeIdx = -1;
+      for (let i = 0; i < syncedLyrics.length; i++) {
+        if (syncedLyrics[i].timeMs <= timeMs) {
+          activeIdx = i;
+        } else {
+          break;
+        }
+      }
+
+      syncedLyrics.forEach((item, idx) => {
+        if (idx === activeIdx) {
+          if (!item.el.classList.contains('active')) {
+            item.el.classList.add('active');
+            item.el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        } else {
+          item.el.classList.remove('active');
+        }
+      });
+    }
+
+    // --- Navigation Tabs ---
+    function switchTab(tabId) {
+      document.querySelectorAll('.nav-btn, .mobile-nav-item').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.tab === tabId);
+      });
+      document.querySelectorAll('.tab-page').forEach(page => {
+        page.style.display = 'none';
+      });
+      document.getElementById(`tab-${tabId}`).style.display = 'block';
+    }
+
+    // --- Render Catalog to UI ---
+    function renderCatalog() {
+      const featGrid = document.getElementById('featured-grid');
+      const trendList = document.getElementById('trending-list');
+
+      featGrid.innerHTML = '';
+      trendList.innerHTML = '';
+
+      catalog.forEach((song, idx) => {
+        // Card
+        const card = document.createElement('div');
+        card.className = 'song-card';
+        card.onclick = () => loadSong(idx, true);
+        card.innerHTML = `
+          <div class="song-thumb-box">
+            <img src="${song.thumb}" alt="${song.title}" loading="lazy">
+            <div class="play-badge">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+            </div>
+          </div>
+          <h4>${song.title}</h4>
+          <p>${song.artist}</p>
+        `;
+        featGrid.appendChild(card);
+
+        // Row
+        const row = document.createElement('div');
+        row.className = 'song-row';
+        row.dataset.id = song.id;
+        row.onclick = () => loadSong(idx, true);
+        row.innerHTML = `
+          <img src="${song.thumb}" alt="${song.title}">
+          <div class="song-row-info">
+            <h5>${song.title}</h5>
+            <p>${song.artist} • ${song.album}</p>
+          </div>
+          <div class="song-row-actions">
+            <span>${formatTime(song.duration)}</span>
+          </div>
+        `;
+        trendList.appendChild(row);
+      });
+    }
+    renderCatalog();
+
+    function filterMood(mood) {
+      document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+      event.target.classList.add('active');
+
+      if (mood === 'All') {
+        currentQueue = [...catalog];
+      } else {
+        currentQueue = catalog.filter(s => s.mood === mood || s.mood === 'All');
+      }
+      renderCatalog();
+    }
+
+    // --- Real-time Search Suggestions ---
+    const searchInput = document.getElementById('search-input');
+    const suggestionsBox = document.getElementById('suggestions-box');
+    const searchResults = document.getElementById('search-results');
+    let searchDebounce = null;
+
+    searchInput.addEventListener('input', (e) => {
+      clearTimeout(searchDebounce);
+      const query = e.target.value.trim();
+      if (!query) {
+        suggestionsBox.style.display = 'none';
+        searchResults.innerHTML = '';
+        return;
+      }
+
+      searchDebounce = setTimeout(async () => {
+        // Filter local + query suggestions
+        const matches = catalog.filter(s => 
+          s.title.toLowerCase().includes(query.toLowerCase()) || 
+          s.artist.toLowerCase().includes(query.toLowerCase())
+        );
+
+        searchResults.innerHTML = '';
+        matches.forEach((s) => {
+          const row = document.createElement('div');
+          row.className = 'song-row';
+          row.onclick = () => {
+            currentQueue = [s, ...catalog.filter(item => item.id !== s.id)];
+            loadSong(0, true);
+          };
+          row.innerHTML = `
+            <img src="${s.thumb}" alt="${s.title}">
+            <div class="song-row-info">
+              <h5>${s.title}</h5>
+              <p>${s.artist} • ${s.album}</p>
+            </div>
+            <div class="song-row-actions">
+              <span>${formatTime(s.duration)}</span>
+            </div>
+          `;
+          searchResults.appendChild(row);
+        });
+
+        // Quick suggestions
+        suggestionsBox.innerHTML = `
+          <div class="suggestion-item" onclick="selectSuggestion('${query}')">
+            <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+            Search "${query}" across YouTube Music
+          </div>
+        `;
+        suggestionsBox.style.display = 'block';
+      }, 200);
+    });
+
+    function selectSuggestion(q) {
+      searchInput.value = q;
+      suggestionsBox.style.display = 'none';
+    }
+
+    // --- Modals & Overlays ---
+    function openFullscreenPlayer() {
+      document.getElementById('fs-player').classList.add('active');
+    }
+
+    function closeFullscreenPlayer() {
+      document.getElementById('fs-player').classList.remove('active');
+    }
+
+    function openQueueModal() {
+      const qModal = document.getElementById('queue-modal');
+      const qList = document.getElementById('queue-list');
+      document.getElementById('queue-count').textContent = currentQueue.length;
+      qList.innerHTML = '';
+
+      currentQueue.forEach((s, idx) => {
+        const row = document.createElement('div');
+        row.className = `song-row ${idx === currentIndex ? 'playing' : ''}`;
+        row.onclick = () => {
+          loadSong(idx, true);
+          closeQueueModal();
+        };
+        row.innerHTML = `
+          <img src="${s.thumb}" alt="${s.title}">
+          <div class="song-row-info">
+            <h5>${s.title}</h5>
+            <p>${s.artist}</p>
+          </div>
+          <span style="font-size:12px; color:var(--text-muted);">${formatTime(s.duration)}</span>
+        `;
+        qList.appendChild(row);
+      });
+
+      qModal.classList.add('active');
+    }
+
+    function closeQueueModal() {
+      document.getElementById('queue-modal').classList.remove('active');
+    }
+
+    function openSleepModal() {
+      document.getElementById('sleep-modal').classList.add('active');
+    }
+
+    function closeSleepModal() {
+      document.getElementById('sleep-modal').classList.remove('active');
+    }
+
+    function setSleepTimer(mins) {
+      clearTimeout(sleepTimerTimeout);
+      sleepTimerTimeout = setTimeout(() => {
+        audio.pause();
+        isPlaying = false;
+        updatePlayIcon();
+        alert('HeMan Vibes: Sleep timer finished. Goodnight! 🌙');
+      }, mins * 60 * 1000);
+      alert(`Sleep timer set for ${mins} minutes.`);
+      closeSleepModal();
+    }
+
+    function cancelSleepTimer() {
+      clearTimeout(sleepTimerTimeout);
+      alert('Sleep timer cancelled.');
+      closeSleepModal();
+    }
+
+    function toggleFavoriteCurrent() {
+      const current = currentQueue[currentIndex];
+      const heart = document.getElementById('fs-heart');
+      const idx = favorites.findIndex(f => f.id === current.id);
+      if (idx >= 0) {
+        favorites.splice(idx, 1);
+        heart.setAttribute('fill', 'var(--text-muted)');
+      } else {
+        favorites.push(current);
+        heart.setAttribute('fill', 'var(--neon-pink)');
+      }
+      renderFavorites();
+    }
+
+    function renderFavorites() {
+      const fList = document.getElementById('favorites-list');
+      if (favorites.length === 0) {
+        fList.innerHTML = '<p style="color:var(--text-muted); font-size:14px; padding:20px 0;">No favorites saved yet. Heart any song to add it to your library!</p>';
+        return;
+      }
+      fList.innerHTML = '';
+      favorites.forEach(s => {
+        const row = document.createElement('div');
+        row.className = 'song-row';
+        row.onclick = () => {
+          currentQueue = [s, ...catalog.filter(i => i.id !== s.id)];
+          loadSong(0, true);
+        };
+        row.innerHTML = `
+          <img src="${s.thumb}" alt="${s.title}">
+          <div class="song-row-info">
+            <h5>${s.title}</h5>
+            <p>${s.artist}</p>
+          </div>
+        `;
+        fList.appendChild(row);
+      });
+    }
+
+    // --- PWA Installation Event Handling ---
+    let deferredPrompt = null;
+    const pwaBanner = document.getElementById('pwa-banner');
+    const installBtn = document.getElementById('install-pwa-btn');
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      pwaBanner.style.display = 'block';
+    });
+
+    if (installBtn) {
+      installBtn.addEventListener('click', async () => {
+        if (!deferredPrompt) {
+          alert('To install HeMan Vibes on iOS: Tap Share (⬆️) -> "Add to Home Screen". On desktop: Tap the install icon in your browser URL bar.');
+          return;
+        }
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') {
+          pwaBanner.style.display = 'none';
+        }
+        deferredPrompt = null;
+      });
+    }
+
+    // Register Service Worker
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(() => {});
+      });
+    }
+  </script>
 </body>
 </html>
