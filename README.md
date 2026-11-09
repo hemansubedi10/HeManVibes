@@ -47,9 +47,13 @@ Click below to download HeMan Vibes directly for your device:
   <a href="https://github.com/hemansubedi10/HeManVibes/releases/download/v1.0.0/HeManVibes-v1.0.0-linux-x64.deb">
     <img src="https://img.shields.io/badge/Download-Linux%20DEB-FCC624?style=for-the-badge&logo=linux&logoColor=black" height="42" alt="Download Linux" />
   </a>
+  &nbsp;
+  <a href="https://hemansubedi10.github.io/HeManVibes/">
+    <img src="https://img.shields.io/badge/Launch%20Web%20App-PWA%20(iOS%20%26%20Desktop)-FF007F?style=for-the-badge&logo=pwa&logoColor=white" height="42" alt="Launch Web App & PWA" />
+  </a>
 </p>
 
-[**👉 View All Release Assets & Changelogs**](https://github.com/hemansubedi10/HeManVibes/releases/latest)
+[**👉 View All Release Assets & Changelogs**](https://github.com/hemansubedi10/HeManVibes/releases/latest) • [**🌐 Open Live Web Player**](https://hemansubedi10.github.io/HeManVibes/)
 
 </div>
 
@@ -67,13 +71,14 @@ Built using **Kotlin Multiplatform (KMP)** and **Compose Multiplatform (CMP)** w
 
 | Platform | Supported Architecture | File Type | Direct Download Link |
 | :--- | :--- | :--- | :--- |
+| **🌐 Universal Web & PWA** | iOS, Android, macOS, Windows, Linux | Instant PWA | [**Launch Web Player & Install PWA**](https://hemansubedi10.github.io/HeManVibes/) |
 | **🪟 Windows (Installer)** | 64-bit (x64) Windows 10/11 | `.msi` (97 MB) | [**Download Windows Setup (MSI)**](https://github.com/hemansubedi10/HeManVibes/releases/download/v1.0.0/HeManVibes-1.0.0-windows-setup.msi) |
 | **🪟 Windows (Portable)** | 64-bit (x64) No install needed | `.zip` (97 MB) | [**Download Windows Portable (ZIP)**](https://github.com/hemansubedi10/HeManVibes/releases/download/v1.0.0/HeManVibes-1.0.0-windows-portable.zip) |
 | **☕ Cross-Platform** | Any OS with Java 21+ | `.jar` | [**Download Executable JAR**](https://github.com/hemansubedi10/HeManVibes/releases/download/v1.0.0/HeManVibes-1.0.0-crossplatform.jar) |
 | **🤖 Android** | ARM64, ARMv7, x86_64 | `.apk` | [**Download APK (Direct)**](https://github.com/hemansubedi10/HeManVibes/releases/download/v1.0.0/HeManVibes-v1.0.0-android-universal.apk) |
 | **🍎 macOS** | Apple Silicon (M1/M2/M3/M4) & Intel | `.dmg` | [**Download macOS DMG (Direct)**](https://github.com/hemansubedi10/HeManVibes/releases/download/v1.0.0/HeManVibes-v1.0.0-macos-universal.dmg) |
 | **🐧 Linux** | Ubuntu, Debian, Mint (x64) | `.deb` | [**Download Linux DEB (Direct)**](https://github.com/hemansubedi10/HeManVibes/releases/download/v1.0.0/HeManVibes-v1.0.0-linux-x64.deb) |
-| **📱 iOS** | iOS 16.0+ (iPhone & iPad) | Xcode / Sideload | [**iOS Build Instructions**](#-ios-iphone--ipad) |
+| **📱 iOS** | iOS 16.0+ (iPhone & iPad) | PWA / Xcode | [**Install PWA Guide**](#-ios-iphone--ipad) |
 
 ---
 
@@ -96,6 +101,10 @@ Built using **Kotlin Multiplatform (KMP)** and **Compose Multiplatform (CMP)** w
 ---
 
 ## ✨ Features & Interface Showcase
+
+<p align="center">
+  <img src="./assets/screenshot-web.png" alt="HeMan Vibes Live Interface" width="95%" style="border-radius: 16px; border: 1px solid #28224d; box-shadow: 0 16px 40px rgba(0, 245, 255, 0.2);" />
+</p>
 
 - 🎧 **Unlimited YouTube Music Catalog:** Direct access to YouTube Music's global catalog with zero advertisements.
 - 🌊 **Material 3 Expressive Wavy Seek Bar:** Animated fluid sine wave ripples in real-time during playback and flattens smoothly when paused.
@@ -185,6 +194,12 @@ Open the `iosApp` folder in Xcode on macOS:
 open iosApp/iosApp.xcodeproj
 ```
 Select your iOS Simulator or connected iPhone and click **Run**.
+
+### 📲 1-Tap PWA Install (No Xcode / Mac required)
+1. Open [**https://hemansubedi10.github.io/HeManVibes/**](https://hemansubedi10.github.io/HeManVibes/) in **Safari** on your iPhone or iPad.
+2. Tap the **Share** button (`⬆️`).
+3. Scroll down and tap **"Add to Home Screen"**.
+4. Tap **"Add"**. Launch HeMan Vibes directly from your home screen in full standalone mode with lock screen media controls!
 </details>
 
 <details>
