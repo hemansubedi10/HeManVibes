@@ -57,7 +57,10 @@ compose.desktop {
 
             macOS {
                 bundleID = "com.hemanvibes.app"
-                iconFile.set(project.file("../assets/icon.icns"))
+                val icns = project.file("../assets/icon.icns")
+                if (icns.exists()) {
+                    iconFile.set(icns)
+                }
             }
 
             linux {
