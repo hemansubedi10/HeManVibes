@@ -72,6 +72,7 @@ kotlin {
                 implementation(libs.kotlinx.coroutines.swing)
                 implementation(libs.ktor.client.okhttp)
                 implementation(libs.ktor.client.java)
+                implementation("javazoom:jlayer:1.0.1")
             }
         }
 

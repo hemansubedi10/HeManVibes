@@ -3,6 +3,7 @@ package com.hemanvibes.app.player
 import com.hemanvibes.app.model.PlaybackState
 import com.hemanvibes.app.model.PlaybackStatus
 import com.hemanvibes.app.model.Song
+import javazoom.jl.player.Player
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -13,6 +14,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import java.io.BufferedInputStream
+import java.net.URI
 
 class DesktopAudioPlayer : AudioPlayer {
     private val scope = CoroutineScope(Dispatchers.Default)
@@ -20,30 +23,68 @@ class DesktopAudioPlayer : AudioPlayer {
     override val state: StateFlow<PlaybackState> = _state.asStateFlow()
 
     private var progressJob: Job? = null
+    private var playbackJob: Job? = null
+    private var jlPlayer: Player? = null
 
     override fun play(song: Song) {
-        progressJob?.cancel()
+        stopCurrent()
         _state.update {
             it.copy(
                 currentSong = song,
                 status = PlaybackStatus.PLAYING,
                 currentPositionMs = 0,
-                durationMs = (song.durationSeconds.takeIf { d -> d > 0 } ?: 210) * 1000L
+                durationMs = (song.durationSeconds.takeIf { d -> d > 0 } ?: 200) * 1000L
             )
         }
 
-        // Simulate real-time playback clock until media backend buffers
+        startAudio(song)
         startProgressClock()
+    }
+
+    private fun startAudio(song: Song) {
+        val streamUrl = song.streamUrl
+        if (streamUrl.isNullOrBlank()) return
+
+        playbackJob = scope.launch(Dispatchers.IO) {
+            try {
+                val url = URI(streamUrl).toURL()
+                val conn = url.openConnection()
+                conn.connectTimeout = 8000
+                conn.readTimeout = 15000
+                conn.setRequestProperty("User-Agent", "HeManVibes/1.0")
+                val stream = BufferedInputStream(conn.getInputStream())
+                val player = Player(stream)
+                jlPlayer = player
+                player.play()
+            } catch (e: Exception) {
+                // If audio line cannot open or stream ends, keep UI state stable
+            }
+        }
+    }
+
+    private fun stopCurrent() {
+        progressJob?.cancel()
+        playbackJob?.cancel()
+        try {
+            jlPlayer?.close()
+        } catch (_: Exception) {}
+        jlPlayer = null
     }
 
     override fun pause() {
         progressJob?.cancel()
+        try {
+            jlPlayer?.close()
+        } catch (_: Exception) {}
+        jlPlayer = null
         _state.update { it.copy(status = PlaybackStatus.PAUSED) }
     }
 
     override fun resume() {
-        if (_state.value.currentSong != null) {
+        val current = _state.value.currentSong
+        if (current != null) {
             _state.update { it.copy(status = PlaybackStatus.PLAYING) }
+            startAudio(current)
             startProgressClock()
         }
     }
@@ -53,7 +94,7 @@ class DesktopAudioPlayer : AudioPlayer {
     }
 
     override fun stop() {
-        progressJob?.cancel()
+        stopCurrent()
         _state.update { it.copy(status = PlaybackStatus.IDLE, currentPositionMs = 0) }
     }
 

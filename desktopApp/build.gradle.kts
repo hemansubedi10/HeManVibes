@@ -40,19 +40,26 @@ compose.desktop {
             modules(
                 "java.base",
                 "java.desktop",
+                "java.logging",
                 "java.net.http",
                 "java.naming",
                 "java.management",
                 "java.security.jgss",
                 "java.instrument",
                 "java.sql",
-                "jdk.unsupported"
+                "java.xml",
+                "jdk.unsupported",
+                "jdk.crypto.ec"
             )
 
             windows {
                 menuGroup = "HeMan Vibes"
                 upgradeUuid = "68c227bf-463e-4b68-b34e-09f482d8d80c"
                 iconFile.set(project.file("../assets/icon.ico"))
+                shortcut = true
+                menu = true
+                dirChooser = true
+                console = true
             }
 
             macOS {

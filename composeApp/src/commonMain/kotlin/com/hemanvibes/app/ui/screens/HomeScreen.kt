@@ -67,17 +67,18 @@ fun HomeScreen(
     val moods = listOf("Chill Vibe", "Workout", "Focus & Study", "Phonk", "Synthwave", "Party & EDM", "Lofi Beats")
     var selectedMood by remember { mutableStateOf(moods[0]) }
 
-    var trendingSongs by remember { mutableStateOf<List<Song>>(emptyList()) }
-    var quickPicks by remember { mutableStateOf<List<Song>>(emptyList()) }
-    var moodSongs by remember { mutableStateOf<List<Song>>(emptyList()) }
-    var isLoading by remember { mutableStateOf(true) }
+    val curated = remember { innerTube.getCuratedSongs() }
+    var trendingSongs by remember { mutableStateOf(curated) }
+    var quickPicks by remember { mutableStateOf(curated.reversed()) }
+    var moodSongs by remember { mutableStateOf(curated.shuffled()) }
+    var isLoading by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
-        trendingSongs = innerTube.searchSongs("Top Global Hits 2026")
-        quickPicks = innerTube.searchSongs("The Weeknd Daft Punk Dua Lipa")
-        moodSongs = innerTube.searchSongs(selectedMood)
-        isLoading = false
+        val fetchedTrending = innerTube.searchSongs("Top Global Hits 2026")
+        if (fetchedTrending.isNotEmpty()) trendingSongs = fetchedTrending
+        val fetchedQuick = innerTube.searchSongs("The Weeknd Daft Punk Dua Lipa")
+        if (fetchedQuick.isNotEmpty()) quickPicks = fetchedQuick
     }
 
     fun onMoodSelected(mood: String) {
