@@ -59,7 +59,7 @@ compose.desktop {
                 shortcut = true
                 menu = true
                 dirChooser = true
-                console = true
+                console = false
             }
 
             macOS {

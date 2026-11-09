@@ -108,9 +108,14 @@ def fetch_lyrics(track, artist=""):
 
 def launch_app():
     if os.path.exists(APP_EXE):
-        print(f"Launching HeMan Vibes ({APP_EXE})...")
-        subprocess.Popen([APP_EXE], shell=False)
-        print("HeMan Vibes is now running.")
+        app_dir = os.path.dirname(APP_EXE)
+        print(f"Launching HeMan Vibes Native Desktop App...")
+        if sys.platform == "win32":
+            ps_cmd = f'Invoke-CimMethod -ClassName Win32_Process -MethodName Create -Arguments @{{CommandLine = "{APP_EXE}"; CurrentDirectory = "{app_dir}"}} | Out-Null'
+            subprocess.run(["powershell", "-NoProfile", "-Command", ps_cmd], check=False)
+        else:
+            subprocess.Popen([APP_EXE], cwd=app_dir)
+        print("HeMan Vibes is now running on your desktop.")
     else:
         print(f"App binary not found at {APP_EXE}. Running via Gradle...")
         subprocess.Popen(["cmd.exe", "/c", "gradlew.bat", ":desktopApp:run"], cwd=PROJECT_DIR)
